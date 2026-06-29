@@ -1,0 +1,59 @@
+{
+  "schema": "verivault-cert/1",
+  "certificate": {
+    "claim": {
+      "kind": "erc4626.immunity",
+      "payload": {
+        "test_path": "test/BenchGate.t.sol",
+        "result_key": "sdai",
+        "address": "0x83F20F44975D03b1b09e64809B757c47f942BEeA",
+        "block": null,
+        "closed_form_model": false
+      },
+      "oracle": "forge_gate",
+      "target": "onchain:0x83F20F44975D03b1b09e64809B757c47f942BEeA@latest",
+      "deps": []
+    },
+    "verdict": {
+      "status": "PASS",
+      "confidence": 1.0,
+      "counterexample": null,
+      "proof": {
+        "immunity_certificate": true,
+        "max_attacker_profit_wei": -100000000000000000001,
+        "all_profits": {
+          "sdai": -100000000000000000001,
+          "susds": -100000000000000000001,
+          "sfrax": -100000000000000000002,
+          "scrvusd": -100000000000000000002,
+          "sdola": -100000000000000000001,
+          "sfrxeth": -100000000000000000001,
+          "apxeth": -100000000000000000001,
+          "steakusdc": -100000001,
+          "gauntusdc": -100000001,
+          "yvusdc": -100000001,
+          "yvweth": -100000000000000000001,
+          "yvdai": -100000000000000000001,
+          "dusdcv3": -100000002,
+          "dwethv3": -100000000000000000001,
+          "meveth": -100010000000000000000,
+          "steakusdt": -100000001
+        },
+        "scope_covers": "donation/first-depositor inflation diretta, su questo bound D e questo blocco",
+        "scope_excludes": [
+          "oracle/price-manipulation cross-contract",
+          "ERC777/hook-reentrancy sul deposito",
+          "rounding-direction multi-step",
+          "interazioni cross-contract (composizione)"
+        ]
+      },
+      "reason": "nessuna donazione e' profittevole entro il bound -> immune (scope dichiarato)",
+      "script": "test/BenchGate.t.sol",
+      "cost": {}
+    },
+    "composed_from": [],
+    "_schema": "verivault-cert/1"
+  },
+  "content_hash": "d8f41de4a2f73afa0620f625880fe1694586f86e684d1ca399b16c3d14285166",
+  "hmac_sha256": "481093845f982b4fd4ee238a734a58f18b15197d05b1a7b9f327cbab3f8d9382"
+}

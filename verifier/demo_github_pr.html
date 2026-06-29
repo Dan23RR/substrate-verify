@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="it"><head><meta charset="utf-8"/>
+<title>Add list utils · Pull Request #42 · acme/widgets</title>
+<link rel="stylesheet" href="overlay.css"/>
+<style>
+ body{background:#0d1117;color:#c9d1d9;font-family:-apple-system,Segoe UI,sans-serif;margin:0}
+ .gh-header{background:#161b22;border-bottom:1px solid #30363d;padding:14px 22px;font-size:14px}
+ .gh-header b{color:#e6edf3} .gh-header .pr{color:#8b949e}
+ .file{margin:22px;border:1px solid #30363d;border-radius:8px;overflow:hidden}
+ .file-head{background:#161b22;padding:9px 14px;font-family:ui-monospace,monospace;font-size:12.5px;color:#8b949e;border-bottom:1px solid #30363d}
+ table{width:100%;border-collapse:collapse;font-family:ui-monospace,'Cascadia Code',monospace;font-size:12.5px}
+ td{padding:0 10px;vertical-align:top}
+ .blob-num{color:#6e7681;text-align:right;width:1%;user-select:none;background:#0d1117;border-right:1px solid #21262d}
+ .blob-code{white-space:pre}
+ .blob-code-addition{background:#12261e} .blob-code-addition .blob-code-marker{color:#3fb950}
+ .blob-code-context .blob-code-marker{color:#6e7681}
+ .blob-code-marker{display:inline-block;width:14px;user-select:none}
+ .blob-code-inner{white-space:pre}
+</style></head><body>
+<div class="gh-header"><b>Add list utils</b> <span class="pr">#42 · acme/widgets · clamp + running_max</span></div>
+<div class="file" data-tagsearch-path="src/utils/lists.py">
+  <div class="file-head">src/utils/lists.py</div>
+  <table><tbody>
+    <tr><td class="blob-num" data-line-number="1">1</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">import math</span></td></tr>
+    <tr><td class="blob-num" data-line-number="2">2</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner"></span></td></tr>
+    <tr><td class="blob-num" data-line-number="3">3</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner"># Nota: "def" qui in un commento NON deve ingannare l'estrattore robusto.</span></td></tr>
+    <tr><td class="blob-num" data-line-number="4">4</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">LABEL = "questa stringa contiene def fake(): per confondere il parser"</span></td></tr>
+    <tr><td class="blob-num" data-line-number="5">5</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner"></span></td></tr>
+    <tr><td class="blob-num" data-line-number="6">6</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner"></span></td></tr>
+    <tr><td class="blob-num" data-line-number="7">7</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">def clamp(v, lo, hi):</span></td></tr>
+    <tr><td class="blob-num" data-line-number="8">8</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">    """Limita v in [lo, hi]. Funzione CORRETTA: NON deve essere flaggata."""</span></td></tr>
+    <tr><td class="blob-num" data-line-number="9">9</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">    if v &lt; lo:</span></td></tr>
+    <tr><td class="blob-num" data-line-number="10">10</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">        return lo</span></td></tr>
+    <tr><td class="blob-num" data-line-number="11">11</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">    return hi if v &gt; hi else v</span></td></tr>
+    <tr><td class="blob-num" data-line-number="12">12</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner"></span></td></tr>
+    <tr><td class="blob-num" data-line-number="13">13</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner"></span></td></tr>
+    <tr><td class="blob-num" data-line-number="14">14</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">def running_max(xs):</span></td></tr>
+    <tr><td class="blob-num" data-line-number="15">15</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">    """Massimi correnti: out[i] = max(xs[0..i]); len(out) deve essere == len(xs)."""</span></td></tr>
+    <tr><td class="blob-num" data-line-number="16">16</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">    out = []</span></td></tr>
+    <tr><td class="blob-num" data-line-number="17">17</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">    cur = None</span></td></tr>
+    <tr><td class="blob-num" data-line-number="18">18</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">    for i in range(len(xs) - 1):</span></td></tr>
+    <tr><td class="blob-num" data-line-number="19">19</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">        v = xs[i]</span></td></tr>
+    <tr><td class="blob-num" data-line-number="20">20</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">        cur = v if cur is None else (cur if cur &gt;= v else v)</span></td></tr>
+    <tr><td class="blob-num" data-line-number="21">21</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">        out.append(cur)</span></td></tr>
+    <tr><td class="blob-num" data-line-number="22">22</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner">    return out</span></td></tr>
+    <tr><td class="blob-num" data-line-number="23">23</td><td class="blob-code blob-code-addition"><span class="blob-code-marker">+</span><span class="blob-code-inner"></span></td></tr>
+  </tbody></table>
+</div>
+<script>window.__INDEX_URL__="./data/index.json"; window.__SCAR_BASE__="./";</script>
+<script src="nacl.min.js"></script>
+<script src="worker_core.js"></script>
+<script src="chrome_shim.js"></script>
+<script src="content.js"></script>
+</body></html>

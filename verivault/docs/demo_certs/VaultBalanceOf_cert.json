@@ -1,0 +1,45 @@
+{
+  "schema": "verivault-cert/1",
+  "certificate": {
+    "claim": {
+      "kind": "erc4626.donation_inflation",
+      "payload": {
+        "_source": "deterministic(structural-solidity)",
+        "totalAssets_type": "external_balanceOf",
+        "effective_offset_magnitude": 0.0,
+        "dead_shares": false,
+        "donation_vector": true,
+        "defense_strength": 0.0
+      },
+      "oracle": "forge_gate",
+      "target": "C:\\Users\\Utente\\MODELLIPERSONALIZZATI\\DC2026\\Startup\\verivault\\gate\\targets\\VaultBalanceOf.sol",
+      "deps": []
+    },
+    "verdict": {
+      "status": "PASS",
+      "confidence": 1.0,
+      "counterexample": {
+        "max_attacker_profit_wei": 24999999999999999999,
+        "donation_witness_wei": 50000000000000000000,
+        "profits": {
+          "solmate_balanceof": 24999999999999999999,
+          "solmate_internal": -1000000000000000000,
+          "solady_virtualshares": -497512437810945275,
+          "oz_offset0": -497512437810945275,
+          "oz_offset6": -499999997524752464
+        }
+      },
+      "proof": {
+        "vulnerable": true,
+        "scorer_risk": 1.0
+      },
+      "reason": "exec-gate: exploit ESEGUITO su codice reale -> VULN confermata",
+      "script": "test/GeneralGate.t.sol",
+      "cost": {}
+    },
+    "composed_from": [],
+    "_schema": "verivault-cert/1"
+  },
+  "content_hash": "df48c2164d09f5bc46836d57a9c91117772be5db1f84fea25ce08d37f3fe7be3",
+  "hmac_sha256": "9de0e6d06fde4d825834827e657a0af2c7615cbf4830474510eb314578f1b72b"
+}

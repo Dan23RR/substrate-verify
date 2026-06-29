@@ -1,0 +1,984 @@
+[
+ {
+  "commit": "65b893a",
+  "path": "examples/network-acls/main.tf",
+  "tier": "public",
+  "direction": "inbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      80,
+      80
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 110,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      443,
+      443
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 120,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      22,
+      22
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 130,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      3389,
+      3389
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 900,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      1024,
+      65535
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "65b893a",
+  "path": "examples/network-acls/main.tf",
+  "tier": "public",
+  "direction": "outbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      80,
+      80
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 110,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      443,
+      443
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 120,
+    "match": {
+     "src": [
+      167797760,
+      167798783
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      1433,
+      1433
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 130,
+    "match": {
+     "src": [
+      167797760,
+      167798783
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      22,
+      22
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 900,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      32768,
+      65535
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "7bf8360",
+  "path": "examples/network-acls/main.tf",
+  "tier": "public",
+  "direction": "outbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      80,
+      80
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 110,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      443,
+      443
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 120,
+    "match": {
+     "src": [
+      167797760,
+      167798783
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      1433,
+      1433
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 130,
+    "match": {
+     "src": [
+      167797760,
+      167798783
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      22,
+      22
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 140,
+    "match": {
+     "src": [
+      167772160,
+      167773183
+     ],
+     "proto": [
+      1,
+      1
+     ],
+     "itype": [
+      8,
+      8
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 900,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      32768,
+      65535
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "7bf8360",
+  "path": "examples/network-acls/main.tf",
+  "tier": "elasticache",
+  "direction": "outbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      80,
+      80
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 110,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      443,
+      443
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 140,
+    "match": {
+     "src": [
+      167772160,
+      167773183
+     ],
+     "proto": [
+      1,
+      1
+     ],
+     "itype": [
+      12,
+      12
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 900,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      32768,
+      65535
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "c25a58e",
+  "path": "examples/network-acls/main.tf",
+  "tier": "public",
+  "direction": "inbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      80,
+      80
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 110,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      443,
+      443
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 120,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      22,
+      22
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 130,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      3389,
+      3389
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 900,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      1024,
+      65535
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "c25a58e",
+  "path": "examples/network-acls/main.tf",
+  "tier": "public",
+  "direction": "inbound",
+  "family": "v6",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 140,
+    "match": {
+     "src": [
+      0,
+      340282366920938463463374607431768211455
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      80,
+      80
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "c25a58e",
+  "path": "examples/network-acls/main.tf",
+  "tier": "public",
+  "direction": "outbound",
+  "family": "v6",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 150,
+    "match": {
+     "src": [
+      0,
+      340282366920938463463374607431768211455
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      90,
+      90
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "c25a58e",
+  "path": "examples/network-acls/main.tf",
+  "tier": "elasticache",
+  "direction": "outbound",
+  "family": "v6",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 150,
+    "match": {
+     "src": [
+      0,
+      340282366920938463463374607431768211455
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      90,
+      90
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "44e6eaa",
+  "path": "variables.tf",
+  "tier": "public",
+  "direction": "inbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "44e6eaa",
+  "path": "variables.tf",
+  "tier": "private",
+  "direction": "outbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "2c03424",
+  "path": "variables.tf",
+  "tier": "outpost",
+  "direction": "inbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "HEAD",
+  "path": "variables.tf",
+  "tier": "database",
+  "direction": "inbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "HEAD",
+  "path": "examples/network-acls/main.tf",
+  "tier": "public",
+  "direction": "inbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      80,
+      80
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 110,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      443,
+      443
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 120,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      22,
+      22
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 130,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      3389,
+      3389
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 900,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      1024,
+      65535
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "HEAD",
+  "path": "examples/network-acls/main.tf",
+  "tier": "public",
+  "direction": "outbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      80,
+      80
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 110,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      443,
+      443
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 120,
+    "match": {
+     "src": [
+      167797760,
+      167798783
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      1433,
+      1433
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 130,
+    "match": {
+     "src": [
+      167797760,
+      167798783
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      22,
+      22
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 140,
+    "match": {
+     "src": [
+      167772160,
+      167773183
+     ],
+     "proto": [
+      1,
+      1
+     ],
+     "itype": [
+      8,
+      8
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 900,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      32768,
+      65535
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ },
+ {
+  "commit": "8634bcd",
+  "path": "examples/network-acls/main.tf",
+  "tier": "public",
+  "direction": "inbound",
+  "family": "v4",
+  "ok": true,
+  "rules": [
+   {
+    "rn": 100,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      80,
+      80
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 110,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      443,
+      443
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 120,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      22,
+      22
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 130,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      3389,
+      3389
+     ]
+    },
+    "action": "ALLOW"
+   },
+   {
+    "rn": 900,
+    "match": {
+     "src": [
+      0,
+      4294967295
+     ],
+     "proto": [
+      6,
+      6
+     ],
+     "port": [
+      1024,
+      65535
+     ]
+    },
+    "action": "ALLOW"
+   }
+  ]
+ }
+]

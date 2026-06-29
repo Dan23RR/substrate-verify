@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "substrate-verify: a deterministic verification kernel for AI output"
+authors:
+  - family-names: Culotta
+    given-names: Daniel
+repository-code: "https://github.com/Dan23RR/substrate-verify"
+license: MIT
+version: 0.1.0
+date-released: 2026-06-29
+keywords:
+  - AI safety
+  - formal verification
+  - LLM-as-judge
+  - SMT
+  - proof certificates
+references:
+  - type: article
+    title: "RoPE Is a Substrate, Not a Trick: Structural Separation between Toroidal Composition and Transformer Primitives on Finite Groups"
+    authors:
+      - family-names: Culotta
+        given-names: Daniel
+    doi: "10.5281/zenodo.19899195"
+    year: 2026
+  - type: article
+    title: "Behavioral Trust Clustering: A Thermodynamic Governance Layer for Production LLMs"
+    authors:
+      - family-names: Culotta
+        given-names: Daniel
+    doi: "10.5281/zenodo.20028123"
+    year: 2026

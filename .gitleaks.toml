@@ -1,0 +1,18 @@
+# gitleaks config for substrate-verify.
+# Run:  gitleaks detect --no-banner --redact -c .gitleaks.toml
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Benchmark corpora and vendored public crypto contain regex patterns / public test vectors, not real secrets."
+paths = [
+  # 1000 real GitHub regex patterns: a few LITERALLY MATCH private-key formats (e.g. -----BEGIN RSA PRIVATE KEY-----)
+  # because they are detectors, not keys. Reviewed: no key material.
+  '''benchmarks/github-regexp\.csv''',
+  # TweetNaCl (public domain) — Curve25519/Ed25519 constants, not secrets.
+  '''verifier/nacl\.min\.js''',
+  # Signed certificates: each embeds an Ed25519 PUBLIC key + signature only. No seed, no private key.
+  '''.*\.scar$''',
+  # Public mainnet eth_getProof fixture: account proof + public state, no private material.
+  '''examples/eth_proof_fixture\.json''',
+]

@@ -1,0 +1,44 @@
+# --- Secrets and keys: NEVER commit these ---
+*.pem
+*.key
+*.seed
+*_seed*
+*signing_key*
+*private*key*
+.env
+.env.*
+!.env.example
+secrets/
+*.secret
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Node / browser verifier deps ---
+node_modules/
+
+# --- Local scratch / large artifacts ---
+*.log
+.DS_Store
+/tmp/
+scratch/
+
+# --- Foundry / on-chain forks (keep example certs, not local fork state) ---
+cache/
+out/
+broker_state/
+.rpc_url
+# Vendored Foundry dependencies (restored via `forge install`) ship third-party example RPC keys.
+# Never commit them.
+lib/
+**/lib/

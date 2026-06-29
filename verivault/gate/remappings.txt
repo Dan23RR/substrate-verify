@@ -1,0 +1,6 @@
+solmate/=vendor/solmate/src/
+forge-std/=lib/forge-std/src/
+@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
+@oz48/=lib/oz48/contracts/
+compound-protocol/=lib/compound-protocol/contracts/
+solady/=lib/solady/src/

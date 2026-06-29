@@ -1,0 +1,27 @@
+name: verify
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  reproducible-suite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install (core + solver toolchain)
+        run: pip install -e ".[full]"
+
+      # Node is preinstalled on ubuntu-latest (enables the differential / Rosetta leg). forge + a
+      # pinned py-trie are NOT installed here, so the erc4626 and real-mainnet eth-getProof legs
+      # report honest SKIPs. Skips are reported, never silently passed.
+      - name: Acceptance gate (reproducible board + every regression oracle)
+        run: python audit_regression/run_all.py

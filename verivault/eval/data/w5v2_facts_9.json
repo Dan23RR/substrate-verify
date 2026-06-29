@@ -1,0 +1,11 @@
+[
+  {"name": "VaultBalanceOf",  "totalAssets_type": "external_balanceOf",  "effective_offset_magnitude": 0,       "dead_shares": false, "defense_strength": 0.05, "label": 1},
+  {"name": "VaultInternal",   "totalAssets_type": "internal_accounting", "effective_offset_magnitude": 0,       "dead_shares": false, "defense_strength": 0.75, "label": 0},
+  {"name": "OZVault",         "totalAssets_type": "external_balanceOf",  "effective_offset_magnitude": 1,       "dead_shares": false, "defense_strength": 0.50, "label": 0},
+  {"name": "SoladyVault",     "totalAssets_type": "external_balanceOf",  "effective_offset_magnitude": 1,       "dead_shares": false, "defense_strength": 0.55, "label": 0},
+  {"name": "OZVaultOffset6",  "totalAssets_type": "external_balanceOf",  "effective_offset_magnitude": 1000000, "dead_shares": false, "defense_strength": 0.95, "label": 0},
+  {"name": "UnseenVulnVault", "totalAssets_type": "external_balanceOf",  "effective_offset_magnitude": 0,       "dead_shares": false, "defense_strength": 0.00, "label": 1},
+  {"name": "UnseenSafeVault", "totalAssets_type": "internal_accounting", "effective_offset_magnitude": 0,       "dead_shares": false, "defense_strength": 0.85, "label": 0},
+  {"name": "OZ48Vault",       "totalAssets_type": "external_balanceOf",  "effective_offset_magnitude": 0,       "dead_shares": false, "defense_strength": 0.05, "label": 1},
+  {"name": "OZVaultOffset3",  "totalAssets_type": "external_balanceOf",  "effective_offset_magnitude": 1000,    "dead_shares": false, "defense_strength": 0.95, "label": 0}
+]

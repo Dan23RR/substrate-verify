@@ -1,0 +1,12 @@
+{
+  "d19a6119f68e5cadc1df430a33fbb193cbdb73522755e4612abb80f3856cf4ae": {
+    "scar": "data/running_max.scar",
+    "func": "running_max",
+    "status": "REFUTED",
+    "content_hash": "b09dac05da035f2f793f48c27c95376e58450d8887a037612808911bc04c8757",
+    "witness": {
+      "input": "[4, -8, -1, 7]",
+      "output": "[4, 4, 4]"
+    }
+  }
+}

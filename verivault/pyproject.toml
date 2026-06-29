@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "verivault"
+version = "0.0.1"
+description = "Verification-native audit per ERC-4626 share-inflation: gate eseguibile bidirezionale + certificato-immunita + output calibrato. Mattone F0 di Verifier Labs."
+requires-python = ">=3.10"
+license = { text = "Proprietary (TBD) — vedi docs/LICENSES.md" }
+dependencies = []   # CORE: zero dipendenze copyleft. forge-std (MIT) e' nel sotto-progetto forge/.
+
+[project.scripts]
+verivault = "verivault.cli:main"   # CLI prodotto: `verivault audit <src|--onchain addr>` / `verivault demo`
+
+[project.optional-dependencies]
+# CORE = zero dipendenze (kernel + exec-gate forge, il moat). Gli extra sono OPZIONALI, isolati e dichiarati:
+smt = ["z3-solver>=4.12"]    # tier-T1 SMT (oracles/smt_rounding). Assente -> l'SMT ABSTIENE (BRICK 1), il CORE regge.
+llm = ["anthropic>=0.39"]    # Stadio-1 W5-v2 fact-extractor (extract_facts_llm); chiave SOLO da env ANTHROPIC_API_KEY.
+extras = ["numpy>=1.24"]     # estrattore deterministico opzionale (set PROMETHEUS_ROOT) / utility
+
+[tool.setuptools.packages.find]
+include = ["verivault*"]

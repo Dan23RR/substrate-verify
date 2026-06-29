@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Substrate — La Lente Universale",
+  "version": "0.2.0",
+  "description": "Inietta la verità crittografica del kernel sotto il codice, dove gli umani lo leggono. Crypto isolata nel service worker; estrazione robusta dal sorgente autorevole; ri-verifica locale (SHA-256 + Ed25519).",
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://github.com/*/pull/*",
+        "https://github.com/*/blob/*",
+        "https://github.com/*/commit/*"
+      ],
+      "js": ["content.js"],
+      "css": ["overlay.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": [
+    "https://github.com/*",
+    "https://raw.githubusercontent.com/*",
+    "https://*.github.io/*"
+  ],
+  "web_accessible_resources": [
+    { "resources": ["data/*"], "matches": ["<all_urls>"] }
+  ]
+}

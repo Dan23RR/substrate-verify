@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "substrate-verify"
+version = "0.1.0"
+description = "A deterministic verification kernel for AI output: any falsifiable claim -> execution-adjudicated, composable, Ed25519-signed certificate (REFUTED / CONFIRMED / ABSTAIN)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Daniel Culotta", email = "daniel.culotta@gmail.com" }]
+keywords = ["verification", "certificates", "falsification", "proof-carrying", "smart-contracts", "property-testing", "AI-safety", "SMT"]
+
+# The kernel signs certificates with Ed25519 (cryptography); the regex-equivalence domain parses
+# patterns with greenery. Both are needed for the core suite + the regex benchmark.
+dependencies = [
+  "cryptography>=41",
+  "greenery>=4",
+]
+
+[project.optional-dependencies]
+# Enables the solver- and sandbox-backed domains. With these the reproducible suite runs the
+# SMT (Z3) and isolated-WASM legs green instead of skipping them.
+full = [
+  "z3-solver>=4.12",
+  "wasmtime>=14",
+]
+# The optional real-mainnet eth-getProof leg additionally needs a compatible py-trie (pin known-good)
+# and is OFF by default; the differential (Rosetta) leg needs Node.js on PATH; the ERC-4626 exec-gate
+# needs Foundry's `forge` + the `verivault` package. All absent -> honest SKIP, never FAIL.
+
+[project.scripts]
+# Distribution name is `substrate-verify`; the importable package remains `substrate_core`.
+substrate = "substrate_core.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["substrate_core*"]

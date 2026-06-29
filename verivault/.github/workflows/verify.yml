@@ -1,0 +1,38 @@
+# CI — VeriVault green-board (BRICK 8). Gira il CORE Python sempre; i forge-gate se il repo del gate e' presente.
+# Disciplina: ogni merge deve mantenere verde i cancelli con assert (test_*) e i forge-gate offline.
+name: verify
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  core-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: CORE importa + cancelli con assert (offline, zero-deps)
+        run: |
+          python -c "import verivault"
+          python eval/test_algebra.py
+          python eval/test_certificate.py
+          python eval/death_gate.py        # informativo: stampa il NO-GO onesto, non fallisce il build
+          python eval/conformal_gate.py    # informativo: achievability vs overlap
+
+  forge-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Installa Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Checkout del progetto-gate (sotto-modulo o repo separato)
+        run: |
+          echo "NOTA: il gate vive in research_substrate_capacity/exp/virgin/gate (repo separato)."
+          echo "In CI: aggiungere qui il checkout del repo-gate, poi:"
+          echo "  cd <gate> && forge test --match-path test/LabeledBench.t.sol  (+ CToken/General/Rounding/Coupled/OracleCoupled/Fuzz)"
+        # Quando il gate e' un submodule di questo repo, sostituire con:
+        #   - run: cd path/al/gate && for t in LabeledBench CTokenGate GeneralGate RoundingGate RealSolmateGate CoupledGate OracleCoupledGate FuzzGate; do forge test --match-path test/$t.t.sol; done

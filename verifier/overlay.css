@@ -1,0 +1,31 @@
+/* overlay.css — l'iniezione visiva dell'Overlay Universale: banner rosso pulsante + pannello zero-trust. */
+.substrate-banner{
+  display:flex;align-items:center;gap:9px;cursor:pointer;
+  font-family:-apple-system,Segoe UI,sans-serif;font-size:12.5px;color:#ffb4ae;
+  background:linear-gradient(90deg,rgba(248,81,73,.18),rgba(248,81,73,.05));
+  border-left:3px solid #f85149;padding:7px 14px;
+}
+.substrate-banner:hover{background:linear-gradient(90deg,rgba(248,81,73,.28),rgba(248,81,73,.08))}
+.substrate-banner b{color:#ff8a82;font-weight:650}
+.substrate-banner code{background:#2d1416;color:#ffb4ae;padding:1px 6px;border-radius:5px;font-family:ui-monospace,monospace}
+.substrate-banner .sb-act{color:#ff8a82;text-decoration:underline;margin-left:auto;white-space:nowrap}
+.substrate-banner .sb-dot{width:9px;height:9px;border-radius:50%;background:#f85149;flex:0 0 auto;
+  box-shadow:0 0 0 0 rgba(248,81,73,.7);animation:sb-pulse 1.5s infinite}
+@keyframes sb-pulse{0%{box-shadow:0 0 0 0 rgba(248,81,73,.7)}70%{box-shadow:0 0 0 7px rgba(248,81,73,0)}100%{box-shadow:0 0 0 0 rgba(248,81,73,0)}}
+
+#substrate-panel{
+  position:fixed;top:0;right:0;width:380px;max-width:92vw;height:100vh;z-index:2147483647;
+  background:#0f1620;border-left:1px solid #30363d;box-shadow:-12px 0 40px rgba(0,0,0,.5);
+  transform:translateX(100%);transition:transform .22s ease;font-family:-apple-system,Segoe UI,sans-serif;color:#e6edf3}
+#substrate-panel.show{transform:translateX(0)}
+#substrate-panel .sp-head{padding:16px 18px;font-size:15px;font-weight:650;display:flex;align-items:center;border-bottom:1px solid #30363d}
+#substrate-panel .sp-head.ok{background:linear-gradient(110deg,#143b1d,#0d141c);color:#74e08b}
+#substrate-panel .sp-head.bad{background:linear-gradient(110deg,#3a1416,#0d141c);color:#ff8a82}
+#substrate-panel .sp-x{margin-left:auto;cursor:pointer;font-size:20px;opacity:.7;line-height:1}
+#substrate-panel .sp-body{padding:6px 18px 18px}
+#substrate-panel .sp-k{font-size:10.5px;color:#5a7188;text-transform:uppercase;letter-spacing:.5px;margin-top:14px}
+#substrate-panel .sp-v{font-size:13.5px;margin-top:4px;word-break:break-word}
+#substrate-panel code{background:#0a1119;color:#39c5cf;padding:1px 6px;border-radius:5px;font-family:ui-monospace,monospace}
+#substrate-panel .sb-badge{display:inline-block;font-size:11px;font-weight:650;padding:3px 9px;border-radius:6px;background:#3a1416;color:#ff8a82;border:1px solid #5c1e22}
+#substrate-panel .sp-wit{background:#0a1119;border:1px solid #30363d;border-radius:8px;padding:10px;font-family:ui-monospace,monospace;font-size:12.5px;color:#ffb4ae}
+#substrate-panel .sp-note{margin-top:18px;font-size:11px;color:#5a7188;line-height:1.5;border-top:1px solid #21262d;padding-top:12px}

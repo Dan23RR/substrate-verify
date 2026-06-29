@@ -1,0 +1,886 @@
+[
+ {
+  "file": "Benqi_qiAVAX.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w01",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "Benqi qiAVAX = classic Compound V2 cToken (native AVAX), NOT OZ ERC4626 -> no _decimalsOffset, effective offset 0. exchangeRateStoredInternal (qiAVAX:1606): if totalSupply==0 returns fixed initialExchangeRateMantissa (require >0), else (totalCash+totalBorrows-totalReserves)/totalSupply. totalCash=getCashPrior() (qiAVAX:2923) = address(this).balance - msg.value => reads REAL native balance, inflatable by direct send / selfdestruct force-send (donation). mintFresh (qiAVAX:1764): mintTokens = actualMintAmount / exchangeRate via divScalarByExpTruncate, rounds DOWN, no MINIMUM_LIQUIDITY / dead-share mint, no first-deposit floor. Fully exploitable first-depositor/donation inflation: mint 1 wei share, force-send AVAX to inflate rate, later deposits round to 0 shares. No defense."
+  }
+ },
+ {
+  "file": "CompoundV2_CErc20_original.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w02",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "CompoundV2 CErc20 (ERC20 underlying), inherits CToken; NOT OZ ERC4626 -> no _decimalsOffset, offset 0. getCashPrior (CErc20:128-131) = EIP20Interface(underlying).balanceOf(address(this)) => reads REAL external ERC20 balance, donation-manipulable (transfer underlying straight to the cToken). doTransferIn uses balanceAfter-balanceBefore (CErc20:142-167) also balanceOf-based. Exchange rate accounting in base CToken: (cash+borrows-reserves)/totalSupply with fixed initialExchangeRateMantissa seed when supply==0; mintTokens=mintAmount/exchangeRate rounds down. No dead shares / no minimum-liquidity burn. Textbook fully-exploitable first-depositor inflation, no defense."
+  }
+ },
+ {
+  "file": "CompoundV2_CToken_original.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w03",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "CompoundV2 base CToken (+ CEther in same file); NOT OZ ERC4626 -> no _decimalsOffset, offset 0. exchangeRateStoredInternal (CToken_original:339): totalSupply==0 -> fixed initialExchangeRateMantissa (require >0 in ctor :1012), else (totalCash+totalBorrows-totalReserves)/totalSupply via getExp. totalCash=getCashPrior(); CEther impl (:2481) = address(this).balance - msg.value (real native balance) and CErc20 impls read underlying.balanceOf(this) => external real balance, donation/force-send manipulable. mintFresh (:497): mintTokens = actualMintAmount / exchangeRate (divScalarByExpTruncate) rounds DOWN; no dead-share / minimum-liquidity mint. Classic fully-exploitable first-depositor/donation inflation. No defense."
+  }
+ },
+ {
+  "file": "CompoundV2_cDAI.sol",
+  "label": 1,
+  "risk": 0.95,
+  "facts": {
+   "id": "w04",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.05,
+   "reason": "CompoundV2 cDAI file is a CErc20Delegator PROXY (886 lines, storage+delegatecall only); NOT OZ ERC4626 -> no _decimalsOffset, offset 0. CTokenStorage holds initialExchangeRateMantissa (internal, comment 'used when totalSupply==0', :174-176) and totalSupply (:206); no dead-share constant, no minimum-liquidity logic anywhere. All mint/redeem/exchangeRate/getCashPrior bodies are delegated to an external implementation (CDaiDelegate) NOT included in this file, so totalAssets source is not directly visible here; however the CToken family it belongs to computes cash from a real underlying-balance source (balanceOf / DSR pot), hence external_balanceOf with slightly reduced certainty. Same vulnerable cToken architecture (fixed-seed exchange rate, divide-down mint, no dead shares). Practically no donation-inflation defense (defense_strength near 0; small bump only reflects that exploit math lives in the unincluded delegate)."
+  }
+ },
+ {
+  "file": "CompoundV2_cETH.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w05",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "CompoundV2 cETH = CEther (native ETH), inherits base CToken; NOT OZ ERC4626 -> no _decimalsOffset, offset 0. getCashPrior (cETH:2481) = address(this).balance - msg.value => REAL native ETH balance, inflatable via plain send / selfdestruct force-send (donation), msg.value subtraction does not stop external donations. exchangeRateStoredInternal (cETH:1336): totalSupply==0 -> fixed initialExchangeRateMantissa, else (totalCash+totalBorrows-totalReserves)/totalSupply. mintFresh (cETH:1493): mintTokens = mintAmount / exchangeRate (divScalarByExpTruncate) rounds DOWN; no dead-share / minimum-liquidity burn. Fully-exploitable first-depositor/donation share-inflation, no defense."
+  }
+ },
+ {
+  "file": "Cream_crETH.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w06",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "Full Compound/Cream CEther+CToken implementation (real vault, this file). exchangeRateStoredInternal() (line ~511): if totalSupply==0 returns initialExchangeRateMantissa; else (totalCash + totalBorrows - totalReserves)/totalSupply via getExp. 'totalCash' = getCashPrior(), and for CEther getCashPrior() (line 125) = address(this).balance - msg.value, i.e. the REAL ETH balance -> directly inflatable by sending ETH to the contract (donation), no internal cash accounting. No _decimalsOffset / virtual shares (offset=0), no dead-shares / minimum-liquidity mint at genesis, no first-mint burn. mintFresh computes mintTokens = actualMintAmount/exchangeRate with truncation (divScalarByExpTruncate) -> classic first-depositor + donation rounding-to-zero inflation. Fully exploitable, no defense."
+  }
+ },
+ {
+  "file": "DeFiHackLabs_ARK_exp.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w07",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0,
+   "reason": "Not an ERC4626/cToken vault. This file is a Foundry PoC (ContractTest) exploiting the ARK reflection/auto-burn token by repeatedly calling autoBurnLiquidityPairTokens() to drain the ARK/WBNB Uniswap-V2 pair reserves, then swapping. The exploited bug is token business-logic / reflection burn affecting AMM reserves, NOT first-depositor/donation share inflation. The file contains no share accounting, no totalAssets()/getCash(), no exchangeRate, no decimals offset, and no dead-shares. Donation-inflation defense concept does not apply; nothing in-file to defend it. Marked offset=0/dead_shares=false/defense=0 to reflect absence of any vault protection in the source."
+  }
+ },
+ {
+  "file": "DeFiHackLabs_CompoundFork_exploit.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w08",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0,
+   "reason": "Not a vault implementation. Foundry PoC (CompoundFork + EXPLOIT_DO3 + Helper) attacking a Compound-fork market on Base via ORACLE PRICE manipulation: Morpho flashloan WETH, mint cWETH, swap WETH->uSUI on UniswapV3 to spike uSUI spot price (getUnderlyingPrice reads manipulated spot), mint cSUI valued at inflated price, then borrow out all WETH cash. Root cause = manipulable spot-price oracle, not first-depositor/donation rounding. File has no vault accounting (no totalAssets/getCash/exchangeRate body, no offset, no dead shares). It only calls external Mintable/Borrowable interfaces. No in-file donation-inflation defense to assess."
+  }
+ },
+ {
+  "file": "DeFiHackLabs_Sonne_exp.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w09",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "Foundry PoC (ContractTest) of the empty-market DONATION share-inflation against Sonne (Compound V2 fork). Sequence: govern via TimelockController to list/configure soVELO market, mint a tiny amount soVELO (mint(400_000_001)), then transfer raw VELO_Token_V2 directly into soVELO (donation) to inflate exchangeRate, enter markets, borrow soUSDC, then redeemUnderlying(donated-1). The fact that donating raw VELO then redeeming changes value proves the target cToken's cash is read from the underlying token's external balanceOf (no internal cash accounting) -> external_balanceOf, no virtual offset, no dead shares on the target. The exploited contract is external; this file itself is the attack script and contains no accounting body. Target is fully exploitable -> defense 0."
+  }
+ },
+ {
+  "file": "HundredFinance_hUSDC_arb.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w10",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "Hundred Finance hUSDC = Compound V2 cToken CErc20Delegator (proxy) + interface stubs only (964 lines). The file contains NO accounting implementation: exchangeRateStored/getCash/balanceOf/mint all forward via delegateTo(implementation, ...) delegatecall to an external implementation contract NOT included in this source. Storage layout (CTokenStorage) holds totalSupply, totalBorrows, totalReserves, initialExchangeRateMantissa internally, and the CErc20 family computes getCashPrior() = underlying.balanceOf(address(this)) (external, donation-manipulable). No _decimalsOffset / virtual shares (offset=0) and no dead-shares/minimum-liquidity in the delegator or storage. This is the canonical Compound-V2-fork empty-market donation-inflation design (Hundred Finance was exploited exactly this way). Caveat: exact exchangeRate body is in the absent implementation, but family design = external balance, zero offset, no dead shares -> no defense."
+  }
+ },
+ {
+  "file": "HundredFinance_hUSDC_gnosis.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w11",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "HundredFinance_hUSDC_gnosis e' un CErc20Delegator Compound/Fuse-fork: il file contiene SOLO il proxy delegator + interfacce/storage (CTokenStorage ha initialExchangeRateMantissa 'used when totalSupply=0', accountTokens, totalSupply). La logica mint/exchangeRate vive nell'implementation delegata (non in questo file), ma e' l'architettura cToken classica: exchangeRate = (getCash + totalBorrows - totalReserves)/totalSupply, dove getCash legge il balanceOf reale dell'underlying nel contratto -> manipolabile via donazione diretta. NESSUN virtual/decimals-offset (lo storage non lo contiene), NESSUN mint di dead/minimum-shares al genesis. E' esattamente il vettore first-depositor/donation-inflation che colpi' HundredFinance. Difesa assente. (Letto interamente il file.)"
+  }
+ },
+ {
+  "file": "Raft_InterestRatePositionManager.sol",
+  "label": 1,
+  "risk": 0.85,
+  "facts": {
+   "id": "w12",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.55,
+   "reason": "Raft_InterestRatePositionManager NON e' un vault ERC4626/cToken share-minting per depositanti: e' un position manager CDP stile Liquity. Collateral e debito sono ERC20Indexable rebasing con storedIndex (mint = amount.divUp(storedIndex), setIndex = backingAmount.divUp(supply)). Il mint di collateral e' 1:1 con l'amount depositato (_adjustCollateral: raftCollateralToken.mint(position, collateralChange) + safeTransferFrom dello stesso collateralChange); non c'e' conversione assets->shares proporzionale a (totalAssets/totalSupply), quindi il classico first-depositor share-inflation NON si applica strutturalmente. _updateDebtAndCollateralIndex legge collateralToken.balanceOf(address(this)) (esterno) per l'indice collaterale -> donazione gonfia l'indice/valore ma NON crea mispricing di shares sfruttabile come nel pattern 4626; esistono guard tipo CannotLiquidateLastPosition e MCR. Nessun offset, nessuna dead-share. defense_strength media-alta perche' la CLASSE first-depositor/donation-inflation tipica dei 4626 non e' presente, non per una difesa esplicita. (Letto file 4305 righe: delegator-irrelevante, ERC20Indexable, PositionManager._adjustDebt/_adjustCollateral/_updateDebtAndCollateralIndex.)"
+  }
+ },
+ {
+  "file": "Rari_fDAI.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w13",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "Rari_fDAI: identico per struttura a w11 \u2014 CErc20Delegator Fuse-fork. Il file contiene SOLO il proxy delegator (delegatecall a implementation) + CTokenAdminStorage/CTokenStorage/interfacce; initialExchangeRateMantissa 'used when minting first CTokens (totalSupply=0)'. La logica mint/redeem/exchangeRate e' nell'implementation delegata (assente dal file) ma e' l'accounting cToken standard con getCash = balanceOf(underlying) esterno -> exchange rate manipolabile per donazione diretta. NESSUN decimals/virtual-offset nello storage, NESSUN dead/minimum-share mint al genesis. E' il vettore first-depositor/donation che colpi' Rari/Fuse. Difesa assente. (Letto interamente il file.)"
+  }
+ },
+ {
+  "file": "Resupply_ResupplyPair.sol",
+  "label": 1,
+  "risk": 0.9,
+  "facts": {
+   "id": "w14",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.1,
+   "reason": "Resupply_ResupplyPair (FraxLend v3 fork) non e' un vault di shares per depositanti: i depositanti/lender sono solo il protocollo. La superficie inflation e' (a) le BORROW shares via VaultAccount.toShares/toAmount (accounting INTERNO in storage totalBorrow.amount/.shares, immune a donazione del debt token) e (b) il COLLATERAL che e' un ERC4626 esterno: totalCollateral() legge IConvexStaking/collateral.balanceOf(address(this)) (ESTERNO, manipolabile) e currentRateInfo.lastShares = IERC4626(collateral).convertToShares(PAIR_DECIMALS). NESSUN virtual-offset, NESSUN mint di dead/minimum-liquidity shares nel pair. SHARE_REFACTOR_PRECISION=1e12 e' solo refactoring anti-deterioramento ratio, non difesa anti-inflation. _updateExchangeRate usa 1e36/oracle.getPrices(collateral) \u2014 su mercato vergine il prezzo dello share ERC4626 collaterale e' donation-manipolabile (exploit Resupply giu-2025). Difesa quasi nulla. (Letto file interamente.)"
+  }
+ },
+ {
+  "file": "Resupply_ResupplyPairCore.sol",
+  "label": 1,
+  "risk": 0.18000000000000002,
+  "facts": {
+   "id": "w15",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.1,
+   "reason": "Resupply_ResupplyPairCore: il core dell'accounting. BORROW shares gestite via VaultAccount (totalBorrow struct in storage -> accounting INTERNO per il debito, immune a donazione diretta del debt token); toShares(_,true) round-up usato in _borrow e _isSolvent. MA: NESSUN virtual/decimals-offset e NESSUN dead/minimum-share mint al genesis nel pair; il primo borrow su totalBorrow vuoto e' 1:1 (VaultAccountingLibrary standard). Il collateral e' un ERC4626 ESTERNO: deposit via IERC4626(collateral).deposit, valutazione via _updateExchangeRate = 1e36/IOracle.getPrices(collateral) e currentRateInfo.lastShares=convertToShares(PAIR_DECIMALS); totalCollateral() (in w14, override) legge balanceOf esterno. Il vettore reale dell'hack Resupply e' la manipolazione del prezzo/share del 4626 collaterale su mercato appena deployato (donation inflation del cToken/4626 sottostante), non protetta. Constants: PAIR_DECIMALS=1e18, SHARE_REFACTOR_PRECISION=1e12 (no difesa inflation). Marcato internal_accounting perche' l'accounting di share PROPRIO del pair (borrow) e' interno; ma la difesa contro la classe donation/first-depositor (che passa per il 4626 esterno + oracle) e' quasi nulla. (Letto file interamente + ResupplyPairConstants.)"
+  }
+ },
+ {
+  "file": "Solmate_ERC4626_noprotection.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w16",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "Solmate minimal ERC4626 (Solmate_ERC4626_noprotection.sol). convertToShares (l.124-128) and convertToAssets (l.130-134) use the raw 'supply == 0 ? assets : assets.mulDivDown(supply, totalAssets())' formula with NO virtual offset, NO decimals-offset, NO minimum-liquidity/dead-shares minted at genesis. previewMint/previewWithdraw (l.140-150) same. First depositor mints shares = assets 1:1, then can donate the underlying directly to inflate totalAssets() and round subsequent depositors' shares to 0 (classic first-depositor/donation inflation). totalAssets() is abstract (l.122) and in the canonical Solmate pattern is implemented as asset.balanceOf(address(this)), i.e. real-balance based and donation-manipulable. Fully exploitable, no defense."
+  }
+ },
+ {
+  "file": "Sonne_soVELO.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w17",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "Despite the soVELO filename, the source is a standard Compound CErc20/CToken fork. exchangeRateStoredInternal (l.657-684) returns initialExchangeRateMantissa when _totalSupply==0, else exchangeRate = (totalCash + totalBorrows - totalReserves) * 1e18 / _totalSupply. totalCash = getCashPrior() = EIP20Interface(underlying).balanceOf(address(this)) (l.148-151) -> external real-balance, donation-manipulable. mintFresh (l.796-851) computes mintTokens = div_(actualMintAmount, exchangeRate). No dead shares, no virtual/decimals offset, no minimum first-mint. This is exactly the empty-market exchange-rate manipulation: attacker mints 1 wei of cToken, donates large underlying to spike exchangeRate, then later depositors get rounded down. Fully exploitable (the Sonne/Compound-fork donation-inflation class)."
+  }
+ },
+ {
+  "file": "SushiBar.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w18",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "SushiBar (xSUSHI). enter() (l.722-732): totalSushi = sushi.balanceOf(address(this)); totalShares = totalSupply(); if (totalShares==0 || totalSushi==0) _mint(msg.sender, _amount) else what = _amount*totalShares/totalSushi. Uses external sushi.balanceOf(this) for the asset side (donation/direct-transfer manipulable). No dead shares minted at genesis, no virtual offset, no minimum-liquidity. Canonical inflation: first user enters with 1 wei (mints 1 share), donates large SUSHI to the bar, second depositor's 'what' rounds to 0 -> attacker owns all shares. leave() (l.735-740) divides by totalShares with no protection. Fully exploitable."
+  }
+ },
+ {
+  "file": "Usual_WrappedDollarVault.sol",
+  "label": 1,
+  "risk": 0.85,
+  "facts": {
+   "id": "w19",
+   "effective_offset_magnitude": 1,
+   "dead_shares": true,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.85,
+   "reason": "Usual WrappedDollarVault extends OpenZeppelin ERC4626Upgradeable. There is NO _decimalsOffset() override anywhere in the file (decimals() returns VAULT_DECIMALS, which is the share-token decimals, NOT the conversion offset) -> OZ default _decimalsOffset()==0 -> effective virtual offset is only the OZ baseline +1 (10**0) virtual shares/assets, i.e. the weak default, not a meaningful k-offset. totalAssets() is inherited from ERC4626Upgradeable = IERC20(asset).balanceOf(address(this)) -> external real-balance (donation-readable). HOWEVER initialize() (l.149) executes _mint(DEAD_ADDRESS, INITIAL_SHARES_SUPPLY): a genuine dead-shares / minimum-liquidity premint at genesis, so the vault is never empty for the first real depositor. This dead-share premint (plus deposit/mint ZeroAmount guards at l.396/413) is the actual mitigation and largely neutralizes the first-depositor inflation vector. Not rated 1.0 because totalAssets reads external balanceOf and the exact INITIAL_SHARES_SUPPLY magnitude is defined in an external constants.sol not present in this file, so residual donation-rounding cannot be fully excluded; but the dead-share design is the standard robust defense."
+  }
+ },
+ {
+  "file": "Venus_vBNB.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w20",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "Venus vBNB (VToken/VBNB fork). exchangeRateStoredInternal (l.1677-1707): _totalSupply==0 ? initialExchangeRateMantissa : getExp(totalCash + totalBorrows - totalReserves, _totalSupply). For vBNB, getCashPrior() (l.1291-1295) = address(this).balance - msg.value, i.e. the contract's native BNB balance minus the current message value -> external/real-balance based and manipulable by force-sending BNB (selfdestruct / coinbase) to inflate cash. No dead shares, no virtual/decimals offset, no minimum first-mint requirement. Classic empty-market cToken donation-inflation: mint tiny amount when supply==0, inflate balance, round later depositors to 0. Fully exploitable."
+  }
+ },
+ {
+  "file": "Venus_vUSDC.sol",
+  "label": 1,
+  "risk": 0.95,
+  "facts": {
+   "id": "w21",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.05,
+   "reason": "Venus_vUSDC e' un VBep20Delegator (fork Compound V2, sol 0.5.16), NON un ERC4626 OpenZeppelin: nessun meccanismo di virtual-offset/_decimalsOffset esiste in questo modello cToken, quindi offset effettivo 0. L'exchange rate (exchangeRateStored) e' (totalCash + totalBorrows - totalReserves)/totalSupply, dove getCash() legge EIP20(underlying).balanceOf(address(this)) -> accounting ESTERNO manipolabile da donazione diretta. Lo storage commenta esplicitamente 'initialExchangeRateMantissa used when minting the first VTokens (totalSupply = 0)': il primo depositante conia a un rate fisso senza minimum-liquidity/dead-shares. E' la cToken first-depositor/donation-inflation canonica, nessuna difesa. Giudizio basato sul codice (delegator + storage VToken), non sui commenti."
+  }
+ },
+ {
+  "file": "Flashstake_FarmingLPToken.sol",
+  "label": 1,
+  "risk": 0.95,
+  "facts": {
+   "id": "w22",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.05,
+   "reason": "FarmingLPToken estende BaseERC20 + IFarmingLPToken con contabilita' a 'points' (_pointsPerShare, POINTS_MULTIPLIER, withdrawableTotalLPs); importa IERC4626 ma NON eredita ne' usa l'ERC4626 OZ, quindi nessun _decimalsOffset/virtual-offset -> offset effettivo 0. Nessun mint di dead-shares ne' minimum-liquidity al genesis nel codice mostrato. Il valore per-share dipende dagli LP staccati nel MasterChef (saldo esterno reale), manipolabile via donazione. Corpo troncato ma il PoC allegato conferma totalAssets()=asset.balanceOf(this) (esterno) e shares=assets*supply/ta senza offset ne' dead-shares. Difesa nulla."
+  }
+ },
+ {
+  "file": "Arcadia_LendingPool.sol",
+  "label": 1,
+  "risk": 0.06000000000000001,
+  "facts": {
+   "id": "w23",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.7,
+   "reason": "Arcadia LendingPool e' un DebtToken ERC4626 (eredita DebtToken/ERC4626). Il modifier processInterests usa realisedDebt e totalRealisedLiquidity (variabili di STORAGE che maturano interesse internamente), e la contabilita' del debito si basa su totalRealisedLiquidity/realisedLiquidityOf, NON su asset.balanceOf(this). Per un debt-token totalAssets deriva dal debito realizzato interno: una donazione diretta dell'underlying al contratto non sposta questo accounting -> resistente all'inflazione first-depositor/donation classica. Nessun _decimalsOffset e nessun mint di dead-shares nel codice, quindi la difesa proviene dall'accounting interno, non da un offset (per questo non 1.0; esiste un path donateToTranche annotato come potenziale vettore residuo). Giudizio dal codice (realisedDebt/totalRealisedLiquidity), non dal commento di header."
+  }
+ },
+ {
+  "file": "dTRINITY_L2Pool.sol",
+  "label": 1,
+  "risk": 0.030000000000000006,
+  "facts": {
+   "id": "w24",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.85,
+   "reason": "dTRINITY L2Pool eredita Pool (Aave V3) e si limita a decodificare calldata compatta e a inoltrare a supply/withdraw/borrow del Pool: NON e' un ERC4626, non c'e' _decimalsOffset -> offset effettivo 0. Il modello Aave V3 conia aToken con scaledBalance = amount/liquidityIndex, dove liquidityIndex e' accounting INTERNO che cresce solo per interesse: una donazione diretta dell'underlying all'aToken non altera l'indice -> immune alla share-inflation first-depositor/donation. Nessun dead-shares. I metadati del benchmark confermano che il Pool sicuro Aave V3 e' 'Counterpart to MahaLend, dTRINITY' (stessa PoolInstance/SupplyLogic): la classe di rischio qui e' altra (oracle/spot-price), non la donation-inflation delle quote. Giudizio dal modello di accounting Aave V3, non dal commento 'donation attack' del file troncato."
+  }
+ },
+ {
+  "file": "MahaLend_Pool.sol",
+  "label": 1,
+  "risk": 0.030000000000000006,
+  "facts": {
+   "id": "w25",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.85,
+   "reason": "MahaLend Pool e' un fork di Aave V3 Pool (VersionedInitializable, PoolStorage, IPool), NON un ERC4626 -> nessun _decimalsOffset, offset effettivo 0. supply()/withdraw() instradano a SupplyLogic che usa il modello scaledBalance/liquidityIndex: gli share (scaledBalance) sono amount.rayDiv(liquidityIndex) con liquidityIndex accounting INTERNO che cresce solo per interesse; una donazione diretta dell'underlying non muove l'indice -> resistente all'inflazione first-depositor/donation delle quote. Nessun mint di dead-shares. Stessa implementazione PoolInstance del Pool Aave V3 marcato 'safe' nel benchmark (counterpart esplicito). Giudizio dal modello di accounting Aave V3, non dai commenti placeholder del file troncato."
+  }
+ },
+ {
+  "file": "2_EFLeverVault_0xe39fd820b58f83205db1d9225f28105971c3d309.sol",
+  "label": 1,
+  "risk": 0.9,
+  "facts": {
+   "id": "w26",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.1,
+   "reason": "EFLeverVault (Solidity 0.5.x, NON-ERC4626). Le shares sono il token esterno ef_token mintato via generateTokens. Nessun virtual-offset/decimals-offset (codice pre-OZ-ERC4626). Nessuna dead-share/minimum-liquidity al genesis: deposit() fa bootstrap 1:1 con SOLO 'require(_amount>=1e16)' come minimo iniziale debole (riga 353), poi ef_amount = (amount-fee)*totalSupply/volume_before (riga 373). volume_before = getVolume() = getCollateral()-getDebt(), entrambi letti LIVE da IAAVE(aave).getUserAccountData(address(this)) (righe 328-339): accounting ESTERNO sul saldo della posizione Aave, manipolabile gonfiando il collaterale/posizione. getVirtualPrice usa lo stesso volume esterno. Il min 1e16 non ferma l'inflazione di volume_before via donazione/deposito diretto. Difesa quasi nulla."
+  }
+ },
+ {
+  "file": "4_MetaMorpho_Base_Donation_Attack_0x23479229e52ab6aad312d0b03df9f33b46753b5e.sol",
+  "label": 1,
+  "risk": 0.030000000000000006,
+  "facts": {
+   "id": "w27",
+   "effective_offset_magnitude": 1000000000000,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.85,
+   "reason": "MetaMorpho V1.1 (OZ ERC4626). OVERRIDE REALE di _decimalsOffset(): ritorna DECIMALS_OFFSET = uint8(max(0, 18 - underlyingDecimals)) (costruttore riga 158, confermato dai gemelli stessa codebase in safe/MetaMorpho_erUSDC.sol:615-617). Usato in _convertToShares/Assets come '+ 10**_decimalsOffset()' (righe 675/686) -> per underlying a 6 decimali (USDC, tipico su Base) offset EFFETTIVO = 10^12; per underlying a 18 dec degrada a 10^0=1. totalAssets() usa accounting INTERNO via _accruedFeeAndAssets() (lastTotalAssets + lostAssets, riga 606-610), NON legge balanceOf live -> IMMUNE a donazione diretta. Il commento nel file ('donation attack via totalAssets manipulation') e' CONTRADDETTO dal codice: MetaMorpho e' specificamente hardened (offset OZ + accounting interno). Difesa forte; magnitudine offset asset-dipendente (riportato 1e12 = caso stablecoin tipico). NB: file w27 troncato ma costruttore byte-identico ai gemelli safe/."
+  }
+ },
+ {
+  "file": "ExactlySameMinter_CappedGovToken_0xE565E118e75304dD3cF83dff409c90034b7EA18a.sol",
+  "label": 1,
+  "risk": 0.010000000000000009,
+  "facts": {
+   "id": "w28",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.95,
+   "reason": "CappedGovToken (ERC20Upgradeable, NON-ERC4626). NESSUN meccanismo di share-price/exchange-rate: deposit(amount) fa _mint(vault, amount) e pulla ESATTAMENTE amount di underlying (righe 82-84) -> rapporto rigidamente 1:1, immutabile. Nessun convertToShares, nessun totalAssets, nessun read di balanceOf nel calcolo del mint. Una donazione di underlying alla VotingVault NON altera il ratio 1:1 -> first-depositor/donation-inflation STRUTTURALMENTE INAPPLICABILE (non per offset/dead-shares ma per assenza di prezzo). decimals() hardcoded 18 (riga 48). Niente virtual-offset, niente dead-shares. Effettivamente immune all'inflazione di share."
+  }
+ },
+ {
+  "file": "HegicWBTCPool_HegicPut_0x7094E706E75E13D1E0ea237f71A7C4511e9d270B.sol",
+  "label": 1,
+  "risk": 0.85,
+  "facts": {
+   "id": "w29",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0.15,
+   "reason": "HegicPUT (Hegic V8888 put pool, NON-ERC4626; estende HegicPool con opzioni ERC721). Il file mostra SOLO _profitOf e _calculateLockedAmount (matematica opzioni con SpotDecimals/TokenDecimals/priceDecimals, righe 64-95): nessun codice di minting di LP-share ne' di virtual-offset in questa sottoclasse. L'accounting delle share LP (writeShare, totalBalance, lockedAmount) vive nel parent HegicPool, NON presente nel tree (import './HegicPool.sol'). Nessun decimals-offset, nessuna dead-share visibile. totalAssets_type=unknown perche' la contabilita' del pool e' nel parent non-vendorizzato; per design noto HegicPool usa totalBalance interno con bootstrap 1:1 delle share e nessun virtual-offset. La sottoclasse non aggiunge alcuna difesa anti-inflazione -> difesa bassa nella parte ispezionabile."
+  }
+ },
+ {
+  "file": "ResupplyZeroRate_ResupplyPair_0x6e90c85a495d54c6d7E1f3400FEF1f6e59f86bd6.sol",
+  "label": 1,
+  "risk": 0.85,
+  "facts": {
+   "id": "w30",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.3,
+   "reason": "ResupplyPair 'ZeroRate' (fork Fraxlend v3.0.2, NON-ERC4626 deposit-vault; e' una lending pair). Le 'share' sono borrow-shares nel VaultAccount totalBorrow gestito da VaultAccountingLibrary (toShares/toAmount), che nel default Fraxlend NON ha virtual-offset (bootstrap 1:1 quando total.shares==0). Nessuna dead-share. Difesa presente ma diversa: minimumBorrowAmount = 1000*PAIR_DECIMALS (1000e18) (ResupplyPairCore:66), minimumLeftoverDebt = 10000e18, e SHARE_REFACTOR_PRECISION = 1e12 (ResupplyPairConstants:16) per il refactor delle share. totalCollateral() (ResupplyPair:421-431) legge ESTERNAMENTE IConvexStaking.balanceOf / collateral.balanceOf -> manipolabile via donazione. L'exploit noto (tag ZeroRate, addr 0x6e90...) e' manipolazione dello share-price/exchange-rate su pair quasi-vuota tramite l'accounting borrow-share. Difesa moderata-bassa: floor su minimumBorrowAmount ma nessun virtual-offset ne' dead-shares; storicamente sfruttata. NB: libreria VaultAccount non vendorizzata nel tree."
+  }
+ },
+ {
+  "file": "Venus_vTHE_BSC.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w31",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "Venus vTHE = Compound V2 fork (vToken). File is the verified Unitroller/Comptroller proxy source bundled with the VToken base. Share math fully visible: exchangeRateStoredInternal() (L1616-1646) returns initialExchangeRateMantissa when totalSupply==0, else exchangeRate=(getCashPrior()+totalBorrows-totalReserves)/totalSupply via getExp; mintFresh() (L1774) computes mintTokens = actualMintAmount/exchangeRate with NO virtual offset and NO dead-share/minimum-liquidity mint. totalSupply is internal accounting BUT getCashPrior() (abstract L2678, concrete VBep20 reads underlying.balanceOf(this)) is the REAL underlying balance, so a direct token donation inflates the exchange rate -> canonical first-depositor/donation share-inflation, fully exploitable. CompoundV2 model has no decimals-offset concept. defense=0.0."
+  }
+ },
+ {
+  "file": "Belt_beltBNB_BSC.sol",
+  "label": 1,
+  "risk": 0.95,
+  "facts": {
+   "id": "w32",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0.05,
+   "reason": "Belt beltBNB. File (1477 lines) contains only OZ ERC20 (decimals hardcoded 18, internal private _totalSupply, NO _decimalsOffset / not an OZ ERC4626) plus the proxy contract MultiStrategyToken (TransparentUpgradeableProxy). The actual deposit/withdraw share-minting math and the pricePerShare/totalAssets logic live in the implementation contract behind the EIP1967 proxy (the _logic address), which is NOT included in this file. From the on-file code: no virtual offset (offset=0), no dead-shares mint. totalAssets/getCash accounting source is not present in-file -> unknown. Known donation-attack-classified vault; visible defenses are none, but full math is off-file so evidence is incomplete (defense kept near-zero, not 0 exact)."
+  }
+ },
+ {
+  "file": "Beefy_CAKE_Vault_BSC.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w33",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "Beefy CAKE Vault (BeefyVault, full source). deposit() (L891): if (totalSupply()==0) shares=_amount; else shares=_amount*totalSupply()/_pool where _pool=balance(). balance() (L857)=token.balanceOf(address(this))+IStrategy(strategy).balanceOf() -> reads REAL external token balances, donation-manipulable. No dead-shares/minimum-liquidity, no virtual offset (the lone 1e18 at L877 is just getPricePerFullShare scaling, not a defense). First depositor mints 1 share for 1 wei then donates to inflate _pool; classic fully-exploitable first-depositor/donation inflation. defense=0.0."
+  }
+ },
+ {
+  "file": "Helio_Plugin_BSC.sol",
+  "label": 1,
+  "risk": 0.95,
+  "facts": {
+   "id": "w34",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0.05,
+   "reason": "Helio Plugin. File is byte-identical to Belt beltBNB (1477 lines): OZ ERC20 (18 decimals hardcoded, internal private _totalSupply, NOT an OZ ERC4626, no _decimalsOffset) + MultiStrategyToken TransparentUpgradeableProxy wrapper. Share-mint/redeem and totalAssets/pricePerShare logic are in the implementation behind the EIP1967 proxy (off-file). On-file: offset=0, no dead shares. totalAssets accounting source not present -> unknown. Donation-attack-classified vault; visible defenses none but full math off-file (defense near-zero)."
+  }
+ },
+ {
+  "file": "Palm_PLP_BSC.sol",
+  "label": 1,
+  "risk": 0.95,
+  "facts": {
+   "id": "w35",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0.05,
+   "reason": "Palm PLP. File is PURE proxy plumbing only: OZ v4.4.1 TransparentUpgradeableProxy + ERC1967Proxy + ERC1967Upgrade + Proxy + Address + StorageSlot. Grep confirms ZERO occurrences of ERC20/ERC4626/_mint/totalSupply/totalAssets/balanceOf/deposit/decimalsOffset. No share-accounting, offset, or dead-shares logic is observable because the entire vault implementation lives behind the EIP1967 delegatecall proxy (off-file). From this file alone: offset=0 observable, dead_shares not present, totalAssets source unknown. Classified as donation-attack but cannot be confirmed from the proxy source; defense kept near-zero given absence of any in-file protection and donation-attack labeling of the deployed vault."
+  }
+ },
+ {
+  "file": "Tactile_ERC1967Proxy.sol",
+  "label": 1,
+  "risk": 0.0,
+  "facts": {
+   "id": "w36",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 1,
+   "reason": "Tactile_ERC1967Proxy.sol e' il puro OpenZeppelin ERC1967Proxy v5.0.0 (proxy/ERC1967/ERC1967Proxy.sol): solo costruttore che chiama ERC1967Utils.upgradeToAndCall e _implementation() override che legge lo slot EIP-1967. Nessuna logica ERC4626/cToken: non esistono share, ne totalAssets(), ne deposit/mint/convertToShares, ne exchange-rate. Non e' un vault con bilancio share/asset, quindi l'attacco first-depositor/donation-inflation non si applica strutturalmente (nessuna superficie). effective_offset=0 e dead_shares=false perche' il concetto non esiste qui; defense_strength=1.0 nel senso che non c'e' nulla di gonfiabile."
+  }
+ },
+ {
+  "file": "OVIXovGHST_Unitroller.sol",
+  "label": 1,
+  "risk": 0.0,
+  "facts": {
+   "id": "w37",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 1,
+   "reason": "OVIXovGHST_Unitroller.sol e' un Unitroller stile Compound/Fuse (UnitrollerAdminStorage + ComptrollerErrorReporter): storage del comptroller con funzioni admin (_setPendingImplementation/_acceptImplementation/_setPendingAdmin/_acceptAdmin/_toggleAdminRights) e una fallback() che delega via delegatecall a comptrollerImplementation. E' un proxy/registro di mercato, NON un vault: nessun mint di share, nessun totalAssets()/getCash, nessun exchange-rate share/asset, nessun deposit/redeem. L'inflazione first-depositor non si applica: nessun decimals-offset, nessuna dead-share. defense_strength=1.0 perche' non esiste accounting share da manipolare."
+  }
+ },
+ {
+  "file": "FireBird_FireBirdRouter.sol",
+  "label": 1,
+  "risk": 0.0,
+  "facts": {
+   "id": "w38",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 1,
+   "reason": "FireBird_FireBirdRouter.sol e' un router AMM stile Uniswap-V2 (FireBirdRouter is IFireBirdRouter, Ownable, Permitable): add/removeLiquidity, swap*, e _swapSupportingFeeOnTransferTokens che legge IERC20(token).balanceOf(pair) per calcolare amountIn. NON e' un vault ERC4626/cToken: non emette share proprie, non ha totalAssets()/convertToShares, non ha exchange-rate share/asset. Il mint di LP avviene su IFireBirdPair (contratto esterno, non in questo file), e l'eventuale first-mint inflation dell'AMM vive nel Pair, non nel Router. In questo sorgente non c'e' superficie first-depositor/donation: effective_offset=0, dead_shares=false. Le letture balanceOf sono per lo swap AMM, non per un prezzo-share di vault. defense_strength=1.0 (nessun share-vault da gonfiare in questo file)."
+  }
+ },
+ {
+  "file": "MidasLP_Unitroller.sol",
+  "label": 1,
+  "risk": 0.0,
+  "facts": {
+   "id": "w39",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 1,
+   "reason": "MidasLP_Unitroller.sol e' un Unitroller Fuse (UnitrollerAdminStorage + ComptrollerV1/V2/V3Storage + ComptrollerErrorReporter + IFuseFeeDistributor): storage comptroller, funzioni admin, e fallback() con autoImplementation + delegatecall a comptrollerImplementation. Strutturalmente identico a un comptroller-proxy, NON un vault: nessun mint di share, nessun totalAssets()/getCash, nessun deposit/redeem/convertToShares, nessun exchange-rate. L'attacco first-depositor/donation-inflation non si applica (nessuna superficie share). effective_offset=0, dead_shares=false, defense_strength=1.0."
+  }
+ },
+ {
+  "file": "Raft_PositionManager.sol",
+  "label": 1,
+  "risk": 0.0,
+  "facts": {
+   "id": "w40",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 1,
+   "reason": "Raft_PositionManager.sol e' un sistema CDP/stablecoin (R). RToken e' un ERC20 standard (ERC20Permit + ERC20FlashMint) con mint/burn 1:1 ristretti a onlyPositionManager (_mint/_burn diretti, nessun rapporto totalAssets/totalSupply). Collaterale e debito sono tracciati da IERC20Indexable, token rebasing con currentIndex()/setIndex(backingAmount) e INDEX_PRECISION: l'indice e' impostato dallo stato della posizione (accounting interno guidato dal PositionManager), NON da un prezzo-share derivato da balanceOf/saldo reale del vault. Non c'e' alcun flusso ERC4626 deposit->mint-share basato su convertToShares/previewDeposit, ne un totalAssets() che legga un saldo donabile per derivare il prezzo della prima share. Quindi l'inflazione first-depositor/donation non si applica strutturalmente: nessun decimals-offset (effective_offset=0), nessuna dead-share (dead_shares=false). defense_strength=1.0 perche' non esiste un rapporto share/asset bootstrap-abile manipolabile via donazione."
+  }
+ },
+ {
+  "file": "Arcadia.sol",
+  "label": 1,
+  "risk": 0.7,
+  "facts": {
+   "id": "w41",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0.3,
+   "reason": "Arcadia.sol e' uno STUB di 37 righe: il corpo del contratto LendingPool (is Guardian, TrustedCreditor, DebtToken/ERC4626, ...) e' sostituito dal commento '// [Full source code continues in actual file]'. NESSUN codice estraibile: nessun override di _decimalsOffset, nessun corpo di totalAssets(), nessuna logica dead-shares/min-liquidity. L'header doc afferma 'not vulnerable... totalAssets() cannot be manipulated by the first minter' ma e' un COMMENTO non codice (righe 27-29), e c'e' anche un commento contraddittorio 'contains donation attack vulnerabilities in the donateToTranche function' (riga 36). Giudicando solo il CODICE presente: offset effettivo 0 (nessun override visibile), dead_shares assente, totalAssets_type non determinabile (nessun body). Il design noto Arcadia usa accounting interno sul debito (realisedDebt), il che spiegherebbe l'immunita', ma quel codice NON e' nel file. defense_strength bassa-moderata per onesta': non verificabile dal sorgente fornito."
+  }
+ },
+ {
+  "file": "DeFiHackLabs_Cream_exp.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w42",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0,
+   "reason": "File NON e' un vault: e' un PoC forge Test (contract ContractTest is Test) dell'exploit Cream/AMP Oct-2021. Vettore = REENTRANCY ERC777 (ierc1820.setInterfaceImplementer + hook tokensReceived righe 64-75 che richiama crETH.borrow durante il flusso), NON first-depositor/donation-inflation. Nessun codice di vault nel file: nessun _decimalsOffset, nessun totalAssets(), nessuna logica dead-shares. I target (crETH/crAMP) sono esterni via indirizzo. Rispetto alla difesa anti-inflation: nessun offset (0), nessun dead-share, totalAssets_type non presente nel file (unknown). defense_strength 0.0 perche' il file dimostra sfruttabilita' di un protocollo cToken, ma il vettore qui e' reentrancy non donazione."
+  }
+ },
+ {
+  "file": "DeFiHackLabs_Cream_2_exp.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w43",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "File = PoC forge Test dell'exploit Cream Finance Oct-2021 (~$130M), NON un vault. Il vettore-cuore e' MANIPOLAZIONE pricePerShare del vault Yearn yUSD via DONAZIONE diretta: in doIt() righe 271-273 fa IYearnVault(yUSD).withdraw(...) poi 'yDAI_yUSDC_yUSDT_yTUSD.transfer(yUSD, IYearnVault(yUSD).totalAssets())' per raddoppiare pricePerShare (commenti '------------Inflation------------' riga 268, '[13. Pump the pricePerShare]' riga 269). Questo PROVA che il target yUSD calcola totalAssets()/pricePerShare leggendo il SALDO REALE del token (external_balanceOf), quindi manipolabile per donazione -> totalAssets_type=external_balanceOf. Nel file PoC stesso non c'e' _decimalsOffset (0) ne' dead-shares. defense_strength 0.0: l'attacco riesce sfruttando l'assenza di difesa contro la donazione sul totalAssets del vault esterno."
+  }
+ },
+ {
+  "file": "DeFiHackLabs_HundredFinance_1_exp.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w44",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0,
+   "reason": "File = PoC forge Test dell'exploit Hundred Finance su Gnosis, NON un vault. Commento esplicito 'Root cause: ERC667 tokens hooks reentrancy' (riga 8). Vettore = REENTRANCY via callback onTokenTransfer (righe 130-138) durante borrow (borrowXdai invocato dentro la callback), NON first-depositor/donation-inflation. Il flusso (flashloan Sushi USDC -> mint hUSD -> borrow -> reentrancy borrow xDAI) sfrutta mancato reentrancy-guard nel cToken-fork. Nessun codice di vault nel file: nessun _decimalsOffset (0), nessun totalAssets() (unknown), nessun dead-share. defense_strength 0.0 rispetto a difese del target, ma vettore qui e' reentrancy non donazione."
+  }
+ },
+ {
+  "file": "DeFiHackLabs_HundredFinance_2_exp.sol",
+  "label": 1,
+  "risk": 1.0,
+  "facts": {
+   "id": "w45",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0,
+   "reason": "DeFiHackLabs_HundredFinance_2_exp.sol: exploit PoC targeting a Compound/CErc20 cToken fork (Hundred Finance hWBTC = ICErc20Delegate) on Optimism. The PoC code itself proves donation-sensitivity: after mint(4e8) + redeem(totalSupply-2) to drive the pool near-empty, it executes WBTC.transfer(address(hWBTC), donationAmount) and reads the resulting exchangeRate via hWBTC.getAccountSnapshot \u2014 confirming exchangeRate = (cash + borrows - reserves)/totalSupply reads the REAL underlying balance (donation-manipulable, external accounting). CErc20Delegate.getCash() is used to size the borrow (getCash() = underlying.balanceOf(this)). cToken forks predate ERC4626: NO decimals/virtual offset (effective offset 0), NO dead-shares / minimum-liquidity at genesis. Attack succeeds and redeems all donated WBTC. Fully exploitable first-depositor/donation inflation. (Note: the cToken accounting code is on-chain via fork, not literally in this file; facts inferred from the in-file manipulation that is empirically demonstrated to work.)"
+  }
+ },
+ {
+  "file": "DeFiHackLabs_RariCapital_exp.sol",
+  "label": 1,
+  "risk": 0.9,
+  "facts": {
+   "id": "w46",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.1,
+   "reason": "DeFiHackLabs_RariCapital_exp.sol: exploit PoC against an Alpha-Homora-style 'Bank' vault (Bank(0x67B6...9c7A), goblin 0x9EED..b24) on mainnet. The attack first calls the vault's donate() with 1031 ETH, then Bank.work(...) \u2014 the donate() is the inflation vector, evidencing that the vault's per-share value reads the pool's real ETH/asset balance (external, donation-manipulable accounting). It is a pre-ERC4626 leveraged-lending bank: no decimals/virtual offset present (effective offset 0), no dead-shares / minimum-liquidity. Defense effectively absent (exploit succeeds). IMPORTANT HONESTY CAVEAT: the file contains ONLY the exploit harness calling external on-chain addresses; the Bank/goblin accounting source is NOT in this file, so totalAssets_type=external_balanceOf is inferred from the working donate()-based manipulation rather than read from in-file storage code."
+  }
+ },
+ {
+  "file": "DeFiHackLabs_Rari_exp.sol",
+  "label": 1,
+  "risk": 0.9,
+  "facts": {
+   "id": "w47",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.1,
+   "reason": "DeFiHackLabs_Rari_exp.sol: exploit PoC against Rari Capital / Fuse pool 127 (fusdc_127 = ICErc20Delegate, fETH_127 = ICEtherDelegate, Comptroller 0x3f2D...B16F) on mainnet. Target is a Compound cToken fork: getCash() = underlying.balanceOf(this) (external balance), exchangeRate derived from cash; no decimals/virtual offset (cToken fork, effective offset 0), no dead-shares / minimum-liquidity at genesis. The specific in-file vector is a cross-function reentrancy (receive() calls rari_Comptroller.exitMarket(fusdc_127) mid-borrow, while mint/borrow/redeemUnderlying drain the pool), characteristic of the OZ-reentrancy-guard-missing Fuse bug, but the underlying substrate is the same donation/first-depositor-vulnerable external-balance cToken accounting. Defense essentially absent. HONESTY CAVEAT: vault accounting source is on-chain (forked), not literally in this file; facts inferred from the cToken-fork interface and PoC behavior."
+  }
+ },
+ {
+  "file": "1_Vault_Spot_Price_DRLVaultV3_0x6a06707ab339bee00c6663db17ddb422301ff5e8.sol",
+  "label": 1,
+  "risk": 0.9,
+  "facts": {
+   "id": "w48",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0.1,
+   "reason": "1_Vault_Spot_Price_DRLVaultV3 (0x6a06...f5e8): THIS FILE IS A STUB / PLACEHOLDER, NOT SOURCE CODE. It is an EIP-1167 minimal proxy delegating to implementation 0x8aA6B0E10BD6DBaf5159967F92f2E740afE2b4C3, and the file explicitly states the implementation source could not be retrieved (no verified source). There is ZERO Solidity logic to inspect \u2014 I cannot read _decimalsOffset, totalAssets(), getCash, dead-shares, or any defense from this file. All defense facts are UNDETERMINABLE from the provided code: effective_offset reported as 0 only because no override is present in the available text (not a positive finding), dead_shares=false because none is present to read, totalAssets_type=unknown, defense_strength set low (0.1) because no defense can be verified \u2014 NOT an assertion of vulnerability. File labeled vulnerability: share_inflation by the benchmark author, but that is a label/comment, not code-derived."
+  }
+ },
+ {
+  "file": "3_Impermax_V3_Base_0x5d93f216f17c225a8b5ffa34e74b7133436281ee.sol",
+  "label": 1,
+  "risk": 0.9,
+  "facts": {
+   "id": "w49",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0.1,
+   "reason": "3_Impermax_V3_Base (0x5d93...81ee): THIS FILE IS A STUB / PLACEHOLDER, NOT SOURCE CODE. It contains only header comments stating the full source (~48.9KB, solc 0.5.16) is omitted 'due to size constraints' and points to basescan. The only actual Solidity is `pragma solidity =0.5.16;` plus comment lines; SafeMath/implementation explicitly noted as absent. There is NO function body to inspect \u2014 cannot read mint/deposit accounting, exchangeRate, balanceOf usage, offset, or dead-shares. solc 0.5.16 predates ERC4626 so the OZ _decimalsOffset concept is inapplicable. All defense facts UNDETERMINABLE from provided code: effective_offset=0 (no override present in available text, not a positive finding), dead_shares=false (none present to read), totalAssets_type=unknown, defense_strength low (0.1) reflecting inability to verify any defense \u2014 NOT an assertion of vulnerability. 'share_inflation' is the benchmark author's label, not code-derived."
+  }
+ },
+ {
+  "file": "CompoundV3_cUSDCv3.sol",
+  "label": 0,
+  "risk": 0.010000000000000009,
+  "facts": {
+   "id": "w51",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.95,
+   "reason": "CompoundV3_cUSDCv3 = CometWithExtendedAssetList (Comet money market, BUSL pragma 0.8.15). NOT an ERC4626 vault: no deposit(assets,receiver)->shares, no _mint of vault shares priced by totalAssets/totalSupply, no convertToShares. balanceOf(owner) returns present value via presentValueSupply(baseSupplyIndex, principal) (lines ~134-144) -> index-based INTERNAL accounting per CometStorage (baseSupplyIndex, totalSupplyBase, userBasic.principal). Supply credits are computed from principal and the supply index, not from a share/asset ratio, so there is NO first-depositor share-rounding surface to inflate. getReserves()/getCollateralReserves() do read balanceOf(this) but only to compute protocol reserves/collateral, not user share price. The classic 4626 first-depositor/donation-inflation attack is structurally inapplicable. Effective virtual-offset 0 (concept N/A); no dead-shares; accounting is index-internal. Treated as effectively immune to THIS attack class."
+  }
+ },
+ {
+  "file": "Ethena_sUSDe.sol",
+  "label": 0,
+  "risk": 0.85,
+  "facts": {
+   "id": "w52",
+   "effective_offset_magnitude": 1,
+   "dead_shares": true,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.9,
+   "reason": "Ethena sUSDe = StakedUSDeV2 -> StakedUSDe inheriting OpenZeppelin ERC4626 v4.9 (virtual shares/assets). _decimalsOffset() is NOT overridden anywhere -> returns the OZ default 0 -> effective virtual-offset magnitude = 10^0 = 1 (the weak +1 virtual share only). HOWEVER an explicit dead-shares/minimum-liquidity defense is implemented: MIN_SHARES = 1 ether (1e18) and _checkMinShares() (require !(0 < totalSupply < MIN_SHARES)) is invoked at the end of BOTH _deposit and _withdraw overrides (lines 325-372). This forbids the contract from ever resting in the 1-wei-totalSupply state that the first-depositor inflation attack requires, and the first depositor must mint >= 1e18 shares. totalAssets() = IERC20(asset()).balanceOf(address(this)) - getUnvestedAmount() (line 296-298): reads REAL external balanceOf, so raw-asset donation is possible, but reward injection via transferInRewards is smoothed over an 8h VESTING_PERIOD and the MIN_SHARES floor neutralizes the share-price-inflation profitability. Defense strong due to MIN_SHARES=1e18, not due to offset."
+  }
+ },
+ {
+  "file": "GMX_GLP_Vault.sol",
+  "label": 0,
+  "risk": 0.015999999999999993,
+  "facts": {
+   "id": "w53",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.92,
+   "reason": "GMX_GLP_Vault is GMX core Vault.sol (solidity 0.6.12), NOT an ERC4626 share vault. It mints USDG in buyUSDG() priced by the oracle (getMinPrice * tokenAmount / PRICE_PRECISION, line ~1172-1184), and mints/burns USDG (an external ERC20) rather than internal vault shares derived from a totalAssets/totalSupply ratio. Accounting is INTERNAL: poolAmounts, usdgAmounts, tokenBalances are maintained via _transferIn/_updateTokenBalance/_increasePoolAmount (tokenBalances[_token] set from balanceOf but used only to derive _transferIn deltas, not for share pricing). directPoolDeposit() lets anyone donate tokens into poolAmounts but this does not move a per-share exchange rate that a first depositor could exploit, because issuance value comes from the oracle price, not from vault balance/supply. The first-depositor / donation share-inflation attack class does not apply. No virtual offset (concept N/A, 0); no dead-shares (N/A). Effectively immune to THIS attack."
+  }
+ },
+ {
+  "file": "Gearbox_dWETH.sol",
+  "label": 0,
+  "risk": 0.006000000000000005,
+  "facts": {
+   "id": "w54",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.97,
+   "reason": "Gearbox_dWETH = PoolV3 (Gearbox V3) inheriting OZ ERC4626 v4.9 but OVERRIDING _convertToShares/_convertToAssets with the simplified pre-v4.9 form WITHOUT virtual shares: '(assets==0||supply==0)? assets : assets.mulDiv(supply,totalAssets(),rounding)' (lines 374-384) -> effective virtual-offset magnitude = 0 (no decimals-offset, no +1, no 10^k). DESPITE offset=0 it is immune by design because totalAssets() = expectedLiquidity() = _expectedLiquidityLU (uint128 storage) + _calcBaseInterestAccrued() + _calcQuotaRevenueAccrued() (lines 169-185) -> pure INTERNAL accounting updated via _updateBaseInterest/_setExpectedLiquidityLU, explicitly INDEPENDENT of underlying balanceOf. Direct token donations to the pool do NOT change totalAssets, so the share price cannot be inflated. availableLiquidity() reads balanceOf(this) (line 163-164) but only as a withdrawal/borrow cap, not for share pricing. Code comment line 183 states 'pool is not vulnerable to the inflation attack'. No dead-shares minted (not needed). Defense via internal accounting => immune."
+  }
+ },
+ {
+  "file": "Inverse_sDOLA.sol",
+  "label": 0,
+  "risk": 0.015999999999999993,
+  "facts": {
+   "id": "w55",
+   "effective_offset_magnitude": 0,
+   "dead_shares": true,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.92,
+   "reason": "Inverse sDOLA = sDola contract over SOLMATE ERC4626 (solidity 0.8.21). Solmate ERC4626 uses NO virtual shares/offset: convertToShares/Assets do 'supply==0 ? assets/shares' 1:1 then mulDivDown/Up (lines 358-388) -> effective virtual-offset magnitude = 0. Defense is an explicit dead-shares / minimum-liquidity floor: MIN_SHARES = 10**18 enforced in afterDeposit() (require totalSupply >= MIN_SHARES, line 82) and beforeWithdraw() (require totalSupply - shares >= MIN_SHARES, line 93), plus MIN_BALANCE = 10**16 (require totalAssets() >= assets + MIN_BALANCE). Constructor/deployer is expected to seed MIN_SHARES (which become permanently unwithdrawable), so the vault can never sit at the 1-wei-supply state the inflation attack needs. totalAssets() (lines 102-108) = savings.balanceOf(address(this)) minus linearly-distributed weeklyRevenue, i.e. it reads the staked DolaSavings position (internal-protocol accounting) NOT sDola's own idle DOLA balance; deposits auto-stake via afterDeposit, and raw DOLA donated directly to the sDola contract is NOT counted by totalAssets, removing the donation surface. Strong defense via MIN_SHARES=1e18 + accounting that ignores direct donations."
+  }
+ },
+ {
+  "file": "Lido_wstETH.sol",
+  "label": 0,
+  "risk": 0.010000000000000009,
+  "facts": {
+   "id": "w56",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.95,
+   "reason": "Lido WstETH (contract WstETH is ERC20Permit) is NOT a balance-ratio ERC4626. wrap() mints shares = stETH.getSharesByPooledEth(_stETHAmount); unwrap() returns stETH.getPooledEthByShares(_wstETHAmount). The exchange rate is fixed by the EXTERNAL stETH contract's global pooled-eth/shares accounting, completely independent of this contract's own totalSupply or any tokens donated to address(this). There is no local totalAssets()/totalShares ratio to manipulate, so the first-depositor/donation-inflation vector structurally does not exist. No virtual offset and no dead shares, but none are needed: the rate is exogenous (Lido's internal share accounting). totalAssets_type=internal_accounting because the conversion source is stETH's internal shares system (getPooledEthByShares/getSharesByPooledEth), not a balanceOf of this wrapper. Not fully 1.0 because rate trust is delegated to the external stETH rebasing oracle, but classic donation inflation is inapplicable."
+  }
+ },
+ {
+  "file": "MakerDAO_sDAI.sol",
+  "label": 0,
+  "risk": 0.010000000000000009,
+  "facts": {
+   "id": "w57",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.95,
+   "reason": "MakerDAO SavingsDai (sDAI), custom ERC4626. convertToShares = assets*RAY/chi, convertToAssets = shares*chi/RAY where chi is the DSR rate accumulator read from the external Pot (pot.chi()/drip()). Share price is a LINEAR function of the exogenous global rate chi, NOT a ratio of contract balances. totalAssets() = convertToAssets(totalSupply) = totalSupply*chi/RAY, derived purely from internal totalSupply and chi. Donating DAI directly to the contract does not change chi nor totalSupply, so it cannot inflate the share price -> immune to first-depositor/donation inflation. No virtual offset (effective magnitude 0) and no dead-shares minted, but they are unnecessary because conversion is rate-based, not balance-based. totalAssets_type=internal_accounting (never reads dai.balanceOf(address(this)))."
+  }
+ },
+ {
+  "file": "MetaMorpho_erUSDC.sol",
+  "label": 0,
+  "risk": 0.006000000000000005,
+  "facts": {
+   "id": "w58",
+   "effective_offset_magnitude": 1000000000000,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.97,
+   "reason": "MetaMorphoV1_1 (erUSDC) inherits OZ ERC4626 and OVERRIDES _decimalsOffset() to return immutable DECIMALS_OFFSET = max(0, 18 - underlyingDecimals). Underlying is USDC (6 decimals) -> offset = 12 -> 10^12. _convertToSharesWithTotals/_convertToAssetsWithTotals use mulDiv(newTotalSupply + 10**_decimalsOffset(), newTotalAssets + 1) i.e. OZ virtual-shares with a large 1e12 offset. Additionally totalAssets() uses INTERNAL accounting: _accruedFeeAndAssets sums MORPHO.expectedSupplyAssets(...) plus a tracked lostAssets/lastTotalAssets, and stray ERC20 sent to the vault is removed via skim(); raw token donations to address(this) do not enter totalAssets. Dual defense (1e12 virtual offset + internal accounting + supply caps/timelock). dead_shares=false (uses virtual offset, not a burned-shares mint). Very strong."
+  }
+ },
+ {
+  "file": "MetaMorpho_ionicUSDC.sol",
+  "label": 0,
+  "risk": 0.006000000000000005,
+  "facts": {
+   "id": "w59",
+   "effective_offset_magnitude": 1000000000000,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.97,
+   "reason": "MetaMorpho_ionicUSDC is byte-for-byte the same MetaMorphoV1_1 implementation as w58. _decimalsOffset() is OVERRIDDEN to DECIMALS_OFFSET = max(0, 18 - underlyingDecimals); underlying USDC (6 decimals) -> offset 12 -> 10^12 virtual-shares offset in mulDiv(newTotalSupply + 10**_decimalsOffset(), newTotalAssets + 1). totalAssets() reads internal accounting via _accruedFeeAndAssets (MORPHO.expectedSupplyAssets + lostAssets/lastTotalAssets), not balanceOf; direct token donations are skimmable and do not inflate totalAssets. dead_shares=false. Defense effectively identical to w58: large virtual offset combined with donation-immune internal accounting."
+  }
+ },
+ {
+  "file": "Morpho_Blue.sol",
+  "label": 0,
+  "risk": 0.010000000000000009,
+  "facts": {
+   "id": "w60",
+   "effective_offset_magnitude": 1000000,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.95,
+   "reason": "Morpho Blue core singleton (not an ERC4626 wrapper but uses the same supply-share accounting). SharesMathLib applies OZ-style virtual shares/assets: VIRTUAL_SHARES = 1e6, VIRTUAL_ASSETS = 1. toSharesDown = assets*(totalShares + 1e6)/(totalAssets + 1); toAssetsUp = shares*(totalAssets + 1)/(totalShares + 1e6). Effective virtual-share offset = 1e6. market[id].totalSupplyAssets and totalSupplyShares are INTERNAL storage updated only by supply/withdraw/repay/accrueInterest; loanToken donated directly to the Morpho contract (or via flashLoan repay) is NOT counted in totalSupplyAssets, so donation cannot inflate the share price. dead_shares=false (virtual shares are a math constant, not minted/burned to a dead address). Comment explicitly cites OZ virtual-shares anti-inflation method. Strong, though the 1e6 offset is smaller than MetaMorpho's 1e12."
+  }
+ },
+ {
+  "file": "OZ_ERC4626Upgradeable.sol",
+  "label": 0,
+  "risk": 0.85,
+  "facts": {
+   "id": "w61",
+   "effective_offset_magnitude": 1,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.4,
+   "reason": "OZ ERC4626 v5.1.0 base abstract. _decimalsOffset() returns 0 (default, NOT overridden in this base file). _convertToShares = assets.mulDiv(totalSupply()+10**_decimalsOffset(), totalAssets()+1): virtual shares = 10^0 = 1, virtual assets = +1 -> OZ's default virtual-shares/assets mitigation (effective offset magnitude 1). totalAssets() = $._asset.balanceOf(address(this)) -> reads real external balance, manipulable by direct donation. No dead-shares minting, no minimum-liquidity at genesis. Per OZ analysis the default offset(0) makes the attack non-profitable but NOT immune -> partial defense."
+  }
+ },
+ {
+  "file": "OpenZeppelin_ERC4626.sol",
+  "label": 0,
+  "risk": 0.85,
+  "facts": {
+   "id": "w62",
+   "effective_offset_magnitude": 1,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.4,
+   "reason": "OZ ERC4626 v5.6.0 base abstract. _decimalsOffset() returns 0 (default, NOT overridden here). Identical conversion: assets.mulDiv(totalSupply()+10**_decimalsOffset(), totalAssets()+1) -> virtual shares 10^0=1 and virtual assets +1 (default virtual-shares mitigation, effective offset magnitude 1). totalAssets() = IERC20(asset()).balanceOf(address(this)) -> external balanceOf, manipulable by donation. No dead shares, no min-liquidity lock. Same partial default defense as v5.1.0."
+  }
+ },
+ {
+  "file": "ResupplyPairConstants.sol",
+  "label": 0,
+  "risk": 1.0,
+  "facts": {
+   "id": "w63",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0,
+   "reason": "NOT a vault. ResupplyPairConstants is a pure abstract contract containing only precision constants (LTV_PRECISION=1e5, EXCHANGE_PRECISION=1e18, SHARE_REFACTOR_PRECISION=1e12, PAIR_DECIMALS=1e18, etc.) and custom error declarations. No deposit/mint/redeem, no shares, no totalAssets/getCash, no conversion math. There is no inflation-attack surface in this file: no decimals offset, no dead-shares, and totalAssets accounting type is not present (unknown). defense_strength set to 0.0 because no defense logic exists here (the contract simply has no relevant share-accounting to defend)."
+  }
+ },
+ {
+  "file": "Venus_vUSDT_v2.sol",
+  "label": 0,
+  "risk": 0.95,
+  "facts": {
+   "id": "w64",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.05,
+   "reason": "Compound V2 / Venus-fork vToken core (abstract VToken + VBep20 interfaces). exchangeRateStoredInternal(): if totalSupply==0 -> initialExchangeRateMantissa (fixed constant, not balance-derived); else exchangeRate = (getCashPrior() + totalBorrows - totalReserves)/totalSupply. getCashPrior() = real underlying cash balance held by the contract (CErc20-style underlying.balanceOf(this)), so a direct token donation inflates totalCash and thus the exchange rate -> manipulable. mintFresh mints actualMintAmount/exchangeRate with NO virtual-share offset, NO dead-shares, NO minimum-liquidity lock. This is the canonical vulnerable first-depositor/donation-inflation pattern (same family as CREAM/Hundred/Sonne). The initialExchangeRateMantissa only sets the starting rate and is not a defense against donation once cash can be inflated."
+  }
+ },
+ {
+  "file": "YearnV3_yvUSDC.sol",
+  "label": 0,
+  "risk": 0.030000000000000006,
+  "facts": {
+   "id": "w65",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "internal_accounting",
+   "defense_strength": 0.85,
+   "reason": "Yearn V3 Vault (Vyper 0.3.7). _total_assets() = self.total_idle + self.total_debt (pure STORAGE accounting, lines 423-427), NOT balanceOf \u2014 confirmed comment l.227 'Replacing balanceOf(this) to avoid price_per_share manipulation'. Direct donation of the underlying to the vault does NOT change total_idle (only _deposit/_process_report do), so donation-inflation is neutralized. _convert_to_shares/_convert_to_assets (l.431-475) use _total_supply()/_total_assets() from storage; when total_supply==0 returns assets 1:1 with NO virtual offset. _issue_shares_for_amount (l.502-525): total_supply==0 -> new_shares=amount (no offset, no dead-share seeding in initialize l.277-316). balanceOf(self) appears (l.823,887,1065,1124) but ONLY to measure real transfer deltas during strategy deposit/withdraw, never in PPS. Not perfectly immune: no virtual offset and no dead-shares, so the pure-rounding first-depositor surface exists in principle, but the donation vector is closed by internal accounting."
+  }
+ },
+ {
+  "file": "1_Aave_V3_Pool_Proxy_0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2.sol",
+  "label": 0,
+  "risk": 0.19999999999999996,
+  "facts": {
+   "id": "w66",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0.8,
+   "reason": "File is ONLY a proxy: InitializableImmutableAdminUpgradeabilityProxy (BaseImmutableAdminUpgradeabilityProxy + InitializableUpgradeabilityProxy), implementation 0x8147...19Bd is NOT in this file. No ERC4626 share math, no totalAssets(), no _decimalsOffset, no share-minting, no dead-shares present in-code. The only 'defense' text is a comment block (oracle-based pricing) which I disregard per instructions. Architecturally Aave V3 aTokens are NOT share-price ERC4626 (rebasing balances scaled by a liquidity index, 1:1 mint on deposit, collateral oracle-priced), so first-depositor/donation share-inflation does not apply by design \u2014 hence high real-world defense \u2014 but NONE of that logic is verifiable in this proxy file. totalAssets_type unknown (no accounting code in file)."
+  }
+ },
+ {
+  "file": "2_Compound_V3_cWETHv3_0xA17581A9E3356d9A858b789D68B4d866e593aE94.sol",
+  "label": 0,
+  "risk": 0.19999999999999996,
+  "facts": {
+   "id": "w67",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0.8,
+   "reason": "File is ONLY a proxy: OpenZeppelin TransparentUpgradeableProxy (v4.4.1) extending ERC1967Proxy; actual Comet implementation 0x2BEa...CE14 is NOT in this file. No ERC4626 share math, no totalAssets()/getCash, no _decimalsOffset, no dead-shares in-code. Security comment block disregarded per instructions. Architecturally Compound V3 (Comet) uses principal x baseSupplyIndex INTERNAL accounting (not a PPS share token), structurally immune to donation share-inflation \u2014 high real-world defense \u2014 but that logic is absent from this proxy file, so it is not verifiable here. totalAssets_type unknown (no accounting code present)."
+  }
+ },
+ {
+  "file": "Angle_stEUR_Savings.sol",
+  "label": 0,
+  "risk": 0.85,
+  "facts": {
+   "id": "w68",
+   "effective_offset_magnitude": 0,
+   "dead_shares": true,
+   "totalAssets_type": "external_balanceOf",
+   "defense_strength": 0.85,
+   "reason": "Angle Savings (SavingsNameable extends Savings extends BaseSavings, OZ ERC4626Upgradeable). EXPLICIT dead-shares seeding at genesis: initialize() calls _deposit(msg.sender, address(this), 10**decimals/divizer, BASE_18/divizer) (l.73) \u2014 mints the first shares to address(this) (locked/unrecoverable). With divizer=1 this seeds 1e18 shares backed by 1 asset unit; this 1e18 locked supply dominates PPS and makes the classic first-depositor/donation attack economically infeasible. totalAssets() (l.128-130) = _computeUpdatedAssets(super.totalAssets(), dt); OZ super.totalAssets() reads IERC20(asset).balanceOf(this) => EXTERNAL balanceOf, donation-manipulable, only augmented by a rate term. NO virtual/decimals offset in the conversion math: _convertToShares/_convertToAssets (l.177-216) use mulDiv(supply,newTotalAssets) once supply>0, and a fixed BASE_18-vs-10**decimals scale only when supply==0 (not a 10^k OZ offset). Defense is the large seeded dead-shares, not an offset; hence offset magnitude 0 but dead_shares true and strong."
+  }
+ },
+ {
+  "file": "EulerV2_EVault.sol",
+  "label": 0,
+  "risk": 0.21999999999999997,
+  "facts": {
+   "id": "w69",
+   "effective_offset_magnitude": 0,
+   "dead_shares": false,
+   "totalAssets_type": "unknown",
+   "defense_strength": 0.78,
+   "reason": "EulerV2 EVault is a DISPATCHER/router (extends Dispatch). All vault logic is delegated to external modules via use(MODULE_VAULT)/useView(MODULE_VAULT): totalAssets() (l.57), deposit/mint/withdraw/redeem (l.86-92), maxDeposit/preview* all have EMPTY bodies (logic in MODULE_VAULT, not in this file). convertToAssets/convertToShares (l.59-61) call super.* (Base, not in file). cash() (l.106) delegates to MODULE_BORROWING, suggesting internal cash tracking, but not implemented here. Therefore NO share-accounting primitives, NO _decimalsOffset/virtual-shares constant, and NO dead-shares are verifiable from this file. EulerV2's known production design uses a virtual-deposit (VIRTUAL_AMOUNT ~1e6 added to assets+shares in conversions) plus internal cash accounting \u2014 a real first-depositor defense \u2014 but this is in the modules, not this router file, so I cannot confirm offset magnitude or totalAssets source from code present. Marked offset 0 / totalAssets unknown on a strictly in-file basis; real-world defense high."
+  }
+ }
+]

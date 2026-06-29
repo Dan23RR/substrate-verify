@@ -1,0 +1,9 @@
+# Bundle il forge-gate SELF-CONTAINED (harness + lib upstream) dentro la distribuzione,
+# così `verivault audit` funziona senza alcuna dipendenza da cartelle esterne.
+recursive-include gate *
+prune gate/out
+prune gate/cache
+prune gate/.git
+global-exclude *.pyc
+global-exclude __pycache__/*
+include README.md PRODUCT.md MANIFEST.in

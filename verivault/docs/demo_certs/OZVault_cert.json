@@ -1,0 +1,52 @@
+{
+  "schema": "verivault-cert/1",
+  "certificate": {
+    "claim": {
+      "kind": "erc4626.immunity",
+      "payload": {
+        "_source": "deterministic(structural-solidity)",
+        "totalAssets_type": "external_balanceOf",
+        "effective_offset_magnitude": 1.0,
+        "dead_shares": false,
+        "donation_vector": true,
+        "defense_strength": 0.5,
+        "test_path": "test/GeneralGate.t.sol",
+        "result_key": "oz_offset0"
+      },
+      "oracle": "forge_gate",
+      "target": "C:\\Users\\Utente\\MODELLIPERSONALIZZATI\\DC2026\\Startup\\verivault\\gate\\targets\\OZVault.sol",
+      "deps": []
+    },
+    "verdict": {
+      "status": "PASS",
+      "confidence": 1.0,
+      "counterexample": null,
+      "proof": {
+        "immunity_certificate": true,
+        "max_attacker_profit_wei": -497512437810945275,
+        "all_profits": {
+          "solmate_balanceof": 24999999999999999999,
+          "solmate_internal": -1000000000000000000,
+          "solady_virtualshares": -497512437810945275,
+          "oz_offset0": -497512437810945275,
+          "oz_offset6": -499999997524752464
+        },
+        "scope_covers": "donation/first-depositor inflation diretta, su questo bound D e questo blocco",
+        "scope_excludes": [
+          "oracle/price-manipulation cross-contract",
+          "ERC777/hook-reentrancy sul deposito",
+          "rounding-direction multi-step",
+          "interazioni cross-contract (composizione)"
+        ],
+        "scorer_risk": 0.85
+      },
+      "reason": "nessuna donazione e' profittevole entro il bound -> immune (scope dichiarato)",
+      "script": "test/GeneralGate.t.sol",
+      "cost": {}
+    },
+    "composed_from": [],
+    "_schema": "verivault-cert/1"
+  },
+  "content_hash": "2fe677ff5162e017f7ead73b027126a7bdf7831ea59f445004f01d3517fdf3bd",
+  "hmac_sha256": "4a0dc1d5c588a0e7492688faf89a3df94edc5ff6cced515e0e6bc74a86d1e4c9"
+}
