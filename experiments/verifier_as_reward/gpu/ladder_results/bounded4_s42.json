@@ -1,0 +1,239 @@
+{
+  "tag": "bounded4_s42",
+  "kind": "bounded",
+  "L": 4,
+  "seed": 42,
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "max_steps": 600,
+  "k_eval": 16,
+  "metrics": {
+    "n": 384,
+    "n_tasks": 24,
+    "verified_correct_rate": 0.0,
+    "reward_hack_rate": 0.625,
+    "wrong_but_honest_rate": 0.375,
+    "parse_fail_rate": 0.0,
+    "pass_at_k": 0.0,
+    "bounded_hack_rate": {
+      "2": 0.625,
+      "4": 0.2917,
+      "6": 0.0417
+    },
+    "divergence_hist": {
+      "0": 144,
+      "4": 128,
+      "5": 80,
+      "6": 16,
+      "7": 16
+    },
+    "bofn": {
+      "verifier_select": {
+        "certified_rate": 0.0,
+        "certified_wrong_rate": 0.0,
+        "abstain_rate": 1.0
+      },
+      "judge_select": {
+        "certified_rate": 0.625,
+        "certified_wrong_rate": 0.625
+      }
+    }
+  },
+  "train_log": [
+    {
+      "step": 25,
+      "epoch": 0.6578947368421053,
+      "loss": 0.1200245189666748,
+      "reward": 0.2649999949336052,
+      "reward_std": 0.17702453553676606,
+      "completions/mean_length": 7.595
+    },
+    {
+      "step": 50,
+      "epoch": 1.3157894736842106,
+      "loss": -0.009897805452346801,
+      "reward": 0.3118548345565796,
+      "reward_std": 0.17113629326224328,
+      "completions/mean_length": 5.7525
+    },
+    {
+      "step": 75,
+      "epoch": 1.973684210526316,
+      "loss": -0.12819521903991699,
+      "reward": 0.3557661199569702,
+      "reward_std": 0.17302430391311646,
+      "completions/mean_length": 6.1175
+    },
+    {
+      "step": 100,
+      "epoch": 2.6315789473684212,
+      "loss": -0.1794137954711914,
+      "reward": 0.4703629004955292,
+      "reward_std": 0.16750638380646707,
+      "completions/mean_length": 12.3875
+    },
+    {
+      "step": 125,
+      "epoch": 3.2894736842105265,
+      "loss": 0.003600372672080994,
+      "reward": 0.588911292552948,
+      "reward_std": 0.19044253833591937,
+      "completions/mean_length": 15.9175
+    },
+    {
+      "step": 150,
+      "epoch": 3.9473684210526314,
+      "loss": 0.01818695068359375,
+      "reward": 0.5788709616661072,
+      "reward_std": 0.13686478890478612,
+      "completions/mean_length": 16.9625
+    },
+    {
+      "step": 175,
+      "epoch": 4.605263157894737,
+      "loss": 0.004637870192527771,
+      "reward": 0.6111693501472473,
+      "reward_std": 0.1971233708411455,
+      "completions/mean_length": 16.2075
+    },
+    {
+      "step": 200,
+      "epoch": 5.2631578947368425,
+      "loss": 0.0019314554333686828,
+      "reward": 0.5637903165817261,
+      "reward_std": 0.16193386875092983,
+      "completions/mean_length": 15.2825
+    },
+    {
+      "step": 225,
+      "epoch": 5.921052631578947,
+      "loss": -0.0003353920578956604,
+      "reward": 0.5454838669300079,
+      "reward_std": 0.14284196242690086,
+      "completions/mean_length": 16.8975
+    },
+    {
+      "step": 250,
+      "epoch": 6.578947368421053,
+      "loss": -0.0005968639254570007,
+      "reward": 0.5518951547145844,
+      "reward_std": 0.16962102346122265,
+      "completions/mean_length": 15.835
+    },
+    {
+      "step": 275,
+      "epoch": 7.2368421052631575,
+      "loss": 0.0,
+      "reward": 0.5741935455799103,
+      "reward_std": 0.08195732653141022,
+      "completions/mean_length": 16.18
+    },
+    {
+      "step": 300,
+      "epoch": 7.894736842105263,
+      "loss": 0.0035573038458824157,
+      "reward": 0.5731048321723938,
+      "reward_std": 0.11859309382736682,
+      "completions/mean_length": 15.7525
+    },
+    {
+      "step": 325,
+      "epoch": 8.552631578947368,
+      "loss": 0.0,
+      "reward": 0.5693548309803009,
+      "reward_std": 0.14159294225275518,
+      "completions/mean_length": 16.84
+    },
+    {
+      "step": 350,
+      "epoch": 9.210526315789474,
+      "loss": 2.9802322387695313e-10,
+      "reward": 0.5548387014865875,
+      "reward_std": 0.12695580706000328,
+      "completions/mean_length": 16.74
+    },
+    {
+      "step": 375,
+      "epoch": 9.868421052631579,
+      "loss": -0.010345174074172974,
+      "reward": 0.6167741870880127,
+      "reward_std": 0.16919108904898167,
+      "completions/mean_length": 15.845
+    },
+    {
+      "step": 400,
+      "epoch": 10.526315789473685,
+      "loss": 0.0,
+      "reward": 0.5877419352531433,
+      "reward_std": 0.18057264551520347,
+      "completions/mean_length": 14.44
+    },
+    {
+      "step": 425,
+      "epoch": 11.18421052631579,
+      "loss": 0.0,
+      "reward": 0.5558064436912536,
+      "reward_std": 0.18557004377245903,
+      "completions/mean_length": 17.12
+    },
+    {
+      "step": 450,
+      "epoch": 11.842105263157894,
+      "loss": -0.0005825670063495637,
+      "reward": 0.5763709652423858,
+      "reward_std": 0.11695315793156624,
+      "completions/mean_length": 16.055
+    },
+    {
+      "step": 475,
+      "epoch": 12.5,
+      "loss": 0.0,
+      "reward": 0.5816128969192504,
+      "reward_std": 0.16691308960318565,
+      "completions/mean_length": 15.905
+    },
+    {
+      "step": 500,
+      "epoch": 13.157894736842104,
+      "loss": 0.00023321665823459626,
+      "reward": 0.5651209616661071,
+      "reward_std": 0.15874538518488407,
+      "completions/mean_length": 15.5825
+    },
+    {
+      "step": 525,
+      "epoch": 13.81578947368421,
+      "loss": -0.0005860280990600586,
+      "reward": 0.5827822524309159,
+      "reward_std": 0.21094186119735242,
+      "completions/mean_length": 17.0275
+    },
+    {
+      "step": 550,
+      "epoch": 14.473684210526315,
+      "loss": -0.0031748563051223755,
+      "reward": 0.5611290240287781,
+      "reward_std": 0.1617922491580248,
+      "completions/mean_length": 16.095
+    },
+    {
+      "step": 575,
+      "epoch": 15.131578947368421,
+      "loss": 0.0,
+      "reward": 0.5541935420036316,
+      "reward_std": 0.14659033983945846,
+      "completions/mean_length": 15.54
+    },
+    {
+      "step": 600,
+      "epoch": 15.789473684210526,
+      "loss": 5.960464477539063e-10,
+      "reward": 0.5580241882801056,
+      "reward_std": 0.16795522429049015,
+      "completions/mean_length": 16.22
+    },
+    {
+      "step": 600,
+      "epoch": 15.789473684210526
+    }
+  ]
+}

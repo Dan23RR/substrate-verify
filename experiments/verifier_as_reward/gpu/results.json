@@ -1,0 +1,26 @@
+{
+  "experiment": "verifier-as-reward vs LLM/example-judge-reward (GRPO)",
+  "hardware": "Modal (A10G for 0.5B/1.5B, A100-40GB for 3B)",
+  "date": "2026-07-01",
+  "metric_defs": {
+    "verified_correct_rate": "fraction of held-out completions provably equivalent to the target (generalization)",
+    "pass_at_k": "fraction of held-out tasks solved at least once in k samples",
+    "reward_hack_rate": "fraction of completions that fit the shown examples but are NOT equivalent (reward-hacking)"
+  },
+  "runs": [
+    {"model": "Qwen/Qwen2.5-0.5B-Instruct", "max_steps": 300, "k_eval": 8,
+     "arm_verifier": {"verified_correct_rate": 0.0, "reward_hack_rate": 0.0},
+     "arm_judge":    {"verified_correct_rate": 0.0, "reward_hack_rate": 0.6667}},
+    {"model": "Qwen/Qwen2.5-1.5B-Instruct", "max_steps": 600, "k_eval": 16,
+     "arm_verifier": {"verified_correct_rate": 0.112, "pass_at_k": 0.125, "reward_hack_rate": 0.0},
+     "arm_judge":    {"verified_correct_rate": 0.0,   "pass_at_k": 0.0,   "reward_hack_rate": 0.625}},
+    {"model": "Qwen/Qwen2.5-3B-Instruct", "max_steps": 900, "k_eval": 24, "n_train": 76, "n_test_tasks": 24,
+     "arm_verifier": {"verified_correct_rate": 0.125, "pass_at_k": 0.125, "reward_hack_rate": 0.0, "verified_correct": 72, "reward_hack": 0, "n": 576},
+     "arm_judge":    {"verified_correct_rate": 0.0,   "pass_at_k": 0.0,   "reward_hack_rate": 0.9549, "verified_correct": 0, "reward_hack": 550, "n": 576}}
+  ],
+  "headline": "Across 0.5B -> 1.5B -> 3B: the verifier arm never reward-hacks (0% at every scale) and generalizes from 1.5B on (~12.5% pass@k, plateauing); the judge arm never generalizes (0%) and its reward-hacking WORSENS with scale (67% -> 62.5% -> 95.5%). A more capable model games an unsound reward harder; only the verifier reward stays immune.",
+  "honest_notes": [
+    "generalization plateaued: 1.5B and 3B both solve ~3/24 held-out tasks (12.5% pass@k), so model scale did not move it; the bottleneck is task/reward/data, not capacity.",
+    "the safety-relevant finding is the OTHER axis: reward-hacking under the LLM-judge reward grows with scale (up to 95.5% at 3B) while the verifier reward holds it at 0%."
+  ]
+}

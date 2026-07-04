@@ -1,0 +1,74 @@
+{
+  "setup": {
+    "alphabet": [
+      "a",
+      "b"
+    ],
+    "n_targets": 10,
+    "budgets": [
+      2,
+      3,
+      4
+    ],
+    "n_tasks": 30,
+    "skipped": 0,
+    "iters": 60,
+    "eta": 1.0,
+    "verifier_oracle": "greenery FSM regex equivalence (sound); kernel does same via SMT"
+  },
+  "label_sanity_violations": 0,
+  "reward_soundness": {
+    "verifier": {
+      "fp": 0,
+      "fn": 0,
+      "tp": 60,
+      "tn": 60,
+      "fp_rate": 0.0,
+      "fn_rate": 0.0,
+      "n": 120
+    },
+    "judge": {
+      "fp": 30,
+      "fn": 0,
+      "tp": 60,
+      "tn": 30,
+      "fp_rate": 0.25,
+      "fn_rate": 0.0,
+      "n": 120
+    }
+  },
+  "reward_hacking": {
+    "n_hack_candidates": 30,
+    "judge_fooled_by_hack": 30,
+    "judge_fooled_rate": 1.0,
+    "verifier_caught_hack": 30,
+    "verifier_caught_rate": 1.0
+  },
+  "hack_by_example_budget": {
+    "2": {
+      "n": 10,
+      "judge_fp_rate": 1.0,
+      "verifier_fp_rate": 0.0
+    },
+    "3": {
+      "n": 10,
+      "judge_fp_rate": 1.0,
+      "verifier_fp_rate": 0.0
+    },
+    "4": {
+      "n": 10,
+      "judge_fp_rate": 1.0,
+      "verifier_fp_rate": 0.0
+    }
+  },
+  "policy_optimization": {
+    "verifier_reward": {
+      "mean_verified_correct_mass": 1.0,
+      "mean_hack_mass": 0.0
+    },
+    "judge_reward": {
+      "mean_verified_correct_mass": 0.6667,
+      "mean_hack_mass": 0.3333
+    }
+  }
+}

@@ -33,6 +33,10 @@ Certificates are Ed25519-signed, content-hashed, rerun offline, and compose weak
 
 Re-checked by two adversarial audit passes (2026-06-05, 2026-06-06) that re-ran every script and recomputed the certificates by hand. They found only circumscribed cosmetic overclaims (since fixed) and no soundness hole.
 
+## The verifier as a training reward (pre-registered experiments)
+
+A checker that executes claims is also a reward signal. Under `experiments/verifier_as_reward/` are three pre-registered GPU studies (GRPO on Qwen2.5 at 0.5B/1.5B/3B, five seeds per point, fixed optimization compute) comparing the deterministic checker against an example-based judge as the reward, on regex synthesis and then on a second, structurally different firewall-rules domain. Headline, measured with error bars: gaming of the unsound reward grows sharply with model capability (62.3% to 93.3% on regex, 5.1% to 92-100% on firewall rules), while the checker as a certification gate produced **zero wrong certifications across 1,512 task-level selections over 63 training runs**, including on models trained to deceive. The prediction files (`gpu/PREREG_*.md`) were written before each run, and the predictions that failed are reported next to the ones that held. Start from `experiments/verifier_as_reward/RESULTS.md`.
+
 ## Quickstart
 
 ```bash
@@ -52,6 +56,7 @@ substrate_core/  the trusted kernel, adjudicators, SMT/signing/lattice
 verivault/       the ERC-4626 exec-gate vertical (Foundry/forge)
 benchmarks/      labelled corpora (regex GitHub set, firewall ACLs)
 examples/        example signed certificates (.scar) you can rerun
+experiments/     verifier-as-reward: pre-registered GRPO studies (rewards, per-arm results)
 verifier/        standalone browser certificate verifier (no install)
 docs/            ASSURANCE.md (assurance model) + WRITEUP.md
 scripts/         prepublish_check.sh (secret / overclaim gate)
