@@ -26,7 +26,7 @@ Controlli: parse-only@3B hack 0.0% (wrong-honest 100%); base 3B hack 3,4%.
 
 **P5 — NON CONCLUSIVA (caveat pre-dichiarato applicato).** Il base 3B nel DSL nuovo ha parse-fail 47% e pass@k solo 8,3% — poca competenza latente da distruggere. Judge-trained: media 6,7% con 2 seed sopra il base. Niente unteaching netto qui; il test era informativo solo con un base competente. Curiosità onesta: il base 1.5B ha pass@k 20,8% > base 3B 8,3% (il 3B produce più testo non-parsabile: più verboso, meno compliant col formato).
 
-**Dominanza appaiata (bonus):** hack(verifier) < hack(judge) a **ogni coppia seed/scala** in questo dominio (incluso 0.5B, dove nel regex c'erano pareggi sporchi). Correct(verifier) > correct(judge) ovunque tranne il vacuo 0.5B.
+**Dominanza appaiata (bonus, con precisione):** hack(verifier) < hack(judge) a ogni coppia 1.5B/3B; a 0.5B sono pareggi a zero (≤, non <). Sulla correttezza: verifier > judge a ogni coppia 1.5B/3B, ma **a 0.5B il judge batte il verifier** (2/5 seed generalizzano, fino al 12,2%, contro lo 0% del verifier) — pressione di Occam dove il programma vero è più corto dell'hack; primo caso della tassonomia, da dichiarare, non da nascondere.
 
 ## Sintesi trans-dominio (2 domini, 63 run, 6 giorni-GPU equivalenti, ~$60 totali)
 

@@ -188,7 +188,9 @@ def aggregate(groups):
     # E3 fold-in: best-of-n per task, sound selector (certify-or-abstain) vs judge selector
     vsel = [max(g, key=lambda c: c["vscore"]) for g in groups]
     jsel = [max(g, key=lambda c: c["jscore"]) for g in groups]
-    vsel_cert = sum(c["eq"] for c in vsel)          # verifier certifies ONLY on executed equivalence
+    _certify = lambda c: c["eq"]   # the gate's decision rule: certify only on executed equivalence
+    vsel_cert = sum(_certify(c) for c in vsel)
+    vsel_cert_wrong = sum(_certify(c) and not c["eq"] for c in vsel)  # computed (definitionally 0 while _certify==eq; catches any future gate change)
     jsel_cert = sum(c["ex_cons"] for c in jsel)     # judge certifies example-fit
     jsel_cert_wrong = sum(c["ex_cons"] and not c["eq"] for c in jsel)
     return dict(
@@ -202,7 +204,7 @@ def aggregate(groups):
         divergence_hist=dict(sorted(div.items(), key=lambda kv: (len(kv[0]), kv[0]))),
         bofn=dict(
             verifier_select=dict(certified_rate=round(vsel_cert / T, 4),
-                                 certified_wrong_rate=0.0,   # sound: certifies only executed equivalence
+                                 certified_wrong_rate=round(vsel_cert_wrong / T, 4),
                                  abstain_rate=round(1 - vsel_cert / T, 4)),
             judge_select=dict(certified_rate=round(jsel_cert / T, 4),
                               certified_wrong_rate=round(jsel_cert_wrong / T, 4))))

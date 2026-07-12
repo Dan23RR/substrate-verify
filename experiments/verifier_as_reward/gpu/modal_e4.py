@@ -247,7 +247,9 @@ def aggregate(groups):
     dis = Counter(str(c["n_disagree"]) for c in flat if c["parse"] and not c["eq"])
     vsel = [max(g, key=lambda c: c["vscore"]) for g in groups]
     jsel = [max(g, key=lambda c: c["jscore"]) for g in groups]
-    vsel_cert = sum(c["eq"] for c in vsel)
+    _certify = lambda c: c["eq"]   # the gate's decision rule: certify only on exhaustive equality
+    vsel_cert = sum(_certify(c) for c in vsel)
+    vsel_cert_wrong = sum(_certify(c) and not c["eq"] for c in vsel)  # computed (definitionally 0 while _certify==eq; catches any future gate change)
     jsel_cert = sum(c["ex_cons"] for c in jsel)
     jsel_cert_wrong = sum(c["ex_cons"] and not c["eq"] for c in jsel)
     return dict(
@@ -262,7 +264,7 @@ def aggregate(groups):
         disagree_hist=dict(sorted(dis.items(), key=lambda kv: (len(kv[0]), kv[0]))),
         bofn=dict(
             verifier_select=dict(certified_rate=round(vsel_cert / T, 4),
-                                 certified_wrong_rate=0.0,   # sound: certifies only on exhaustive equality
+                                 certified_wrong_rate=round(vsel_cert_wrong / T, 4),
                                  abstain_rate=round(1 - vsel_cert / T, 4)),
             judge_select=dict(certified_rate=round(jsel_cert / T, 4),
                               certified_wrong_rate=round(jsel_cert_wrong / T, 4))))
